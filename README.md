@@ -15,7 +15,8 @@ Setup Db:
 - Copy environment variables from `example.env` and populate the values in your `.env` file
 
 Migration:
-- Run `npx prisma migrate dev` to push db updates to your local db
+- Run `npx prisma generate`
+- Run `npx prisma migrate dev --name init` to push db updates to your local db
 
 After making changes to db schema in `schema.prisma`,
 - Run `npx prisma generate` to update db
