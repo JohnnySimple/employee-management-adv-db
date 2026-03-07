@@ -14,6 +14,12 @@ Setup Db:
 - Create a `.env` file in the root folder.
 - Copy environment variables from `example.env` and populate the values in your `.env` file
 
+Migration:
+- Run `npx prisma migrate dev` to push db updates to your local db
+
+After making changes to db schema in `schema.prisma`,
+- Run `npx prisma generate` to update db
+
 Run the development server:
 
 ```bash
@@ -27,6 +33,7 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
 
 ## Learn More
 
