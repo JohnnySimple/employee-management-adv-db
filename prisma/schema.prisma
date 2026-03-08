@@ -20,3 +20,110 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model Employee {
+  employeeId     Int        @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  dob            DateTime
+  hireDate       DateTime
+  email          String     @unique
+  phone          String?
+  jobStatus      String
+  deptId         Int
+  jobTitleId     Int
+
+  department     Department @relation(fields: [deptId], references: [deptId])
+  jobTitle       JobTitle   @relation(fields: [jobTitleId], references: [jobTitleId])
+  salaries       Salary[]
+  attendance     Attendance[]
+  projects       ProjectAssigned[]
+  employeeLeaves EmployeeLeave[]
+
+  manages        Department[] @relation("DepartmentManager")
+}
+
+model Department {
+  deptId    Int        @id @default(autoincrement())
+  deptName  String
+  managerId Int?
+
+  manager   Employee?  @relation("DepartmentManager", fields: [managerId], references: [employeeId])
+  employees Employee[]
+}
+
+model JobTitle {
+  jobTitleId Int      @id @default(autoincrement())
+  titleName  String
+  payRate    Float
+
+  employees  Employee[]
+}
+
+model Salary {
+  salaryId   Int      @id @default(autoincrement())
+  employeeId Int
+  salaryDate DateTime
+  amount     Float
+
+  employee   Employee @relation(fields: [employeeId], references: [employeeId])
+}
+
+model Attendance {
+  attendanceId Int      @id @default(autoincrement())
+  employeeId   Int
+  workDate     DateTime
+  hoursWorked  Float
+  overtimeHours Float
+
+  employee     Employee @relation(fields: [employeeId], references: [employeeId])
+}
+
+model Project {
+  projectId   Int       @id @default(autoincrement())
+  projectName String
+  startDate   DateTime
+  endDate     DateTime
+  location    String
+
+  assigned    ProjectAssigned[]
+}
+
+model ProjectAssigned {
+  assignId    Int      @id @default(autoincrement())
+  employeeId  Int
+  projectId   Int
+  assignedDate DateTime
+
+  employee    Employee @relation(fields: [employeeId], references: [employeeId])
+  project     Project  @relation(fields: [projectId], references: [projectId])
+}
+
+model Leave {
+  leaveId    Int     @id @default(autoincrement())
+  leaveType  String  // PTO, Sick, etc.
+  employeeLeaves EmployeeLeave[]
+}
+
+model EmployeeLeave {
+  employeeLeaveId Int       @id @default(autoincrement())
+  employeeId      Int
+  leaveId         Int
+  totalLeaveHours Float
+  totalRemaining  Float
+  status          String    @default("Pending") // Pending, Approved, Denied
+  leaveDates      LeaveDate[]
+
+  employee        Employee @relation(fields: [employeeId], references: [employeeId])
+  leave           Leave    @relation(fields: [leaveId], references: [leaveId])
+}
+
+model LeaveDate {
+  leaveDateId Int      @id @default(autoincrement())
+  startDate   DateTime
+  endDate     DateTime
+  hoursOff    Float
+  employeeLeaveId Int
+
+  employeeLeave EmployeeLeave @relation(fields: [employeeLeaveId], references: [employeeLeaveId])
+}
