@@ -2,10 +2,14 @@ import { NextResponse } from "next/server";
 import {prisma} from "@/lib/db"
 
 
+
 // GET Employee BY ID
 export async function GET(req:Request,{params}:{params:{id:string}}){
     try{
-        const employeeId=Number(params.id)
+        const {id}= await params;
+        console.log(id);
+        const employeeId=Number(id)
+        console.log(employeeId);
         if(isNaN(employeeId)){
             return NextResponse.json({error:"Invalid EmployeeID"},{status:400});
         }
@@ -34,7 +38,8 @@ export async function GET(req:Request,{params}:{params:{id:string}}){
 export async function PUT(req:Request,{params}:{params:{id:string}}){
     try{
         const data=await req.json();
-        const employeeId=Number(params.id);
+        const {id}=await params;
+        const employeeId=Number(id);
         if(isNaN(employeeId)){
             return NextResponse.json({error:"Invalid Employee ID"},{status:400});
         }
@@ -88,7 +93,8 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
 // Delete Method which soft deletes and not completely.
 export async function PATCH(req:Request,{params}:{params:{id:string}}){
     try{
-        const employeeId=Number(params.id);
+        const {id}=await params;
+        const employeeId=Number(id);
         if(isNaN(employeeId)){
             return NextResponse.json({error:"Invalid Employee ID"},{status:400});
         }

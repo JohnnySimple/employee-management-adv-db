@@ -12,16 +12,9 @@ export async function GET(){
                 jobTitle:true
             }
         });
-        // fetch the department
-        const departments=await prisma.department.findMany();
-
-        // fetch the job title
-        const jobTitles=await prisma.jobTitle.findMany();
 
         return NextResponse.json({
             employees,
-            departments,
-            jobTitles
         });
     } catch(error){
         return NextResponse.json(
@@ -112,7 +105,7 @@ export async function GET(){
 //    }
 // }
 export async function POST(req: Request) {
-  const text = await req.text();
+const text = await req.text();
   console.log("Raw request body:", text);
 
   let data;
