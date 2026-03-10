@@ -58,7 +58,7 @@ export async function POST(req: Request) {
         .setExpirationTime("1d")
         .sign(secret)
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             token,
             user: {
                 id: user.id,
@@ -67,6 +67,16 @@ export async function POST(req: Request) {
                 employee: user.employee
             }
         })
+
+        response.cookies.set("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24
+        })
+
+        return response
     } catch (error) {
         console.error(error)
 

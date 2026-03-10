@@ -1,0 +1,9 @@
+
+
+export default function AdminEmployees() {
+    return (
+        <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans">
+            Employees
+        </div>
+    )
+}
