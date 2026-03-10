@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import bcrypt from "bcrypt";
 import { SignJWT } from "jose";
 
+const secret = new TextEncoder().encode(process.env.JWT_SECRET)
 
 export async function POST(req: Request) {
     try {
@@ -44,7 +45,6 @@ export async function POST(req: Request) {
             )
         }
 
-        const secret = new TextEncoder().encode(process.env.JWT_SECRET)
         const token = await new SignJWT(
             {
                 userId: user.id,
