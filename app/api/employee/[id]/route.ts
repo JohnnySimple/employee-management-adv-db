@@ -3,17 +3,16 @@ import {prisma} from "@/lib/db"
 
 
 // GET Employee BY ID
-export async function GET({params}:{params:{id:string}}){
+export async function GET(req:Request,{params}:{params:{id:string}}){
     try{
+        const employeeId=Number(params.id)
+        if(isNaN(employeeId)){
+            return NextResponse.json({error:"Invalid EmployeeID"},{status:400});
+        }
         // find Employees
         const employee=await prisma.employee.findUnique({
-            where :{
-                employeeId:Number(params.id),
-            },
-            include:{
-                department:true,
-                jobTitle:true
-            }
+            where :{employeeId},
+            include:{department:true,jobTitle:true}
         });
 
         if(!employee){
@@ -35,6 +34,10 @@ export async function GET({params}:{params:{id:string}}){
 export async function PUT(req:Request,{params}:{params:{id:string}}){
     try{
         const data=await req.json();
+        const employeeId=Number(params.id);
+        if(isNaN(employeeId)){
+            return NextResponse.json({error:"Invalid Employee ID"},{status:400});
+        }
         // required Fields
         const requiredFields=["firstName","lastName","dob","hireDate","email","phone","jobStatus","deptId","jobTitleId"];
         for(const field of requiredFields){
@@ -58,13 +61,13 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
 
         // update Employee
         const employee=await prisma.employee.update({
-            where:{employeeId:Number(params.id)},
+            where:{employeeId},
             data:{
-                firstName:data.firstName,
-                lastName:data.lastName,
+                firstName:data.firstName.trim(),
+                lastName:data.lastName.trim(),
                 dob:dob,
                 hireDate:hireDate,
-                email:data.email,
+                email:data.email.trim(),
                 phone:data.phone,
                 jobStatus:data.jobStatus,
                 deptId:data.deptId,
@@ -73,7 +76,7 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
         });
 
         return NextResponse.json(employee)
-        
+
     }catch(error){
         return NextResponse.json(
             {error:"Unable to Update Employee"},
@@ -85,20 +88,21 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
 // Delete Method which soft deletes and not completely.
 export async function PATCH(req:Request,{params}:{params:{id:string}}){
     try{
+        const employeeId=Number(params.id);
+        if(isNaN(employeeId)){
+            return NextResponse.json({error:"Invalid Employee ID"},{status:400});
+        }
         // Soft Update
         const employee=await prisma.employee.update({
-            where : {
-                employeeId :Number(params.id),
-            },
-            data : {
-                jobStatus:'INACTIVE'
-            }
+            where : {employeeId},
+            data : {jobStatus:'INACTIVE'}
         });
 
         return NextResponse.json({message: "Employee Deactivated Successfully",employee});
+
     } catch(error){
         return NextResponse.json(
-            {error:"Unable to Delete Employee Information"},
+            {error:"Unable to Deactivate Employee"},
             {status : 500}
         );
     }
