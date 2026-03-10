@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
     Sidebar,
@@ -11,8 +13,18 @@ import {
     SidebarMenuButton
 } from "@/components/ui/sidebar";
 import { Building2, Clock, DollarSign, FileText, LayoutDashboard, LogOut, Settings, Shield, Users } from "lucide-react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 export function AppSidebar() {
+
+    const router = useRouter()
+
+    const handleLogout = async () => {
+        await axios.post("/api/auth/logout")
+        router.push("/login")
+    }
+
     return (
         <Sidebar>
             <SidebarHeader className="p-4 text-lg font-semibold">
@@ -107,10 +119,10 @@ export function AppSidebar() {
                     </SidebarMenuItem>
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
-                            <Link href="/logout">
+                            <button onClick={handleLogout}>
                                 <LogOut className="mr-2 h-4 w-4" />
                                 Logout
-                            </Link>
+                            </button>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
