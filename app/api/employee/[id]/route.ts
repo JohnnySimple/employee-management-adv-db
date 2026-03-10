@@ -52,7 +52,9 @@ export async function PATCH(req:Request,{params}:{params:{id:string}}){
             where : {
                 employeeId :Number(params.id),
             },
-            data
+            data : {
+                jobStatus:'inactive'
+            }
         });
 
         return NextResponse.json(employee)
