@@ -19,6 +19,7 @@ Migration:
 - Run `npx prisma migrate dev --name init` to push db updates to your local db
 
 Seed Db:
+- Set `TEST_PASSWORD` value in `.env`
 - Run `npx prisma db seed` to populate db with dummy data
 
 After making changes to db schema in `schema.prisma`,
