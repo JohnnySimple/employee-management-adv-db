@@ -8,7 +8,7 @@ export async function GET({params}:{params:{id:string}}){
         // find Employees
         const employee=await prisma.employee.findUnique({
             where :{
-                employeeId:Number(params.id)
+                employeeId:Number(params.id),
             },
             include:{
                 department:true,
@@ -45,14 +45,25 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
                 );
             }
         }
+        // Convert dob and HireDate to Date objects
+        const dob=new Date(data.dob);
+        if(isNaN(dob.getTime())){
+            return NextResponse.json({error:"Invalid Date of Birth"},{status: 400});
+        }
+
+        const hireDate=new Date(data.hireDate);
+        if(isNaN(hireDate.getTime())){
+            return NextResponse.json({error:"Invalid Hire Date"},{status:400});
+        }
+
         // update Employee
         const employee=await prisma.employee.update({
             where:{employeeId:Number(params.id)},
             data:{
                 firstName:data.firstName,
                 lastName:data.lastName,
-                dob:data.dob,
-                hireDate:data.hireDate,
+                dob:dob,
+                hireDate:hireDate,
                 email:data.email,
                 phone:data.phone,
                 jobStatus:data.jobStatus,
@@ -60,7 +71,9 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
                 jobTitleId:data.jobTitleId
             }
         });
+
         return NextResponse.json(employee)
+        
     }catch(error){
         return NextResponse.json(
             {error:"Unable to Update Employee"},
