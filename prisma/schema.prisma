@@ -14,18 +14,18 @@ datasource db {
 }
 
 model User {
-  id        Int @id @default(autoincrement())
-  name      String  @unique
-  email     String @unique
+  id            Int @id @default(autoincrement())
+  name          String  @unique
+  email         String @unique
   passwordHash  String
-  role  Role  @default(EMPLOYEE)
-  isActive  Boolean @default(true)
+  role  Role    @default(EMPLOYEE)
+  isActive      Boolean @default(true)
 
-  employeeId  Int @unique
-  employee   Employee @relation(fields: [employeeId], references: [employeeId])
+  employeeId    Int? @unique
+  employee      Employee? @relation(fields: [employeeId], references: [employeeId])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 enum Role {
