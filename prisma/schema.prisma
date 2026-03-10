@@ -14,11 +14,24 @@ datasource db {
 }
 
 model User {
-  id        Int @id @default(autoincrement())
-  name      String
-  email     String @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            Int @id @default(autoincrement())
+  name          String  @unique
+  email         String @unique
+  passwordHash  String
+  role  Role    @default(EMPLOYEE)
+  isActive      Boolean @default(true)
+
+  employeeId    Int? @unique
+  employee      Employee? @relation(fields: [employeeId], references: [employeeId])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
 }
 
 model Employee {
@@ -39,6 +52,7 @@ model Employee {
   attendance     Attendance[]
   projects       ProjectAssigned[]
   employeeLeaves EmployeeLeave[]
+  user  User?
 
   manages        Department[] @relation("DepartmentManager")
 }
