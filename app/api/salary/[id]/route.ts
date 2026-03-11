@@ -55,14 +55,25 @@ export async function PATCH(req: Request, context: { params: { id: string } } ){
         const data = await req.json();
 
         // Validate amount
-        const amount = data.amount !== undefined ? parseFloat(data.amount) : undefined;
-        if (amount !== undefined && isNaN(amount)) 
-            return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
+            const amount =
+            data.amount !== undefined
+                ? typeof data.amount === "number"
+                ? data.amount
+                : null
+                : undefined;
+
+        if (amount === null) {
+            return NextResponse.json({ error: "amount must be a number" }, { status: 400 });
+        }
 
         // Validate salaryDate
-        const salaryDate = data.salaryDate ? new Date(data.salaryDate) : undefined;
-        if (salaryDate && isNaN(salaryDate.getTime())) 
-            return NextResponse.json({ error: "Invalid salaryDate" }, { status: 400 });
+        let salaryDate = undefined;
+        if (data.salaryDate !== undefined) {
+            salaryDate = new Date(data.salaryDate);
+        if (isNaN(salaryDate.getTime())) {
+            return NextResponse.json({ error: "salaryDate must be a valid date" }, { status: 400 });
+        }
+        }
 
         const updatedSalary = await prisma.salary.update({
             where: { salaryId },
