@@ -70,8 +70,8 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
             data:{
                 firstName:data.firstName.trim(),
                 lastName:data.lastName.trim(),
-                dob:dob,
-                hireDate:hireDate,
+                dob : new Date(dob),
+                hireDate: new Date(hireDate),
                 email:data.email.trim(),
                 phone:data.phone,
                 jobStatus:data.jobStatus,
