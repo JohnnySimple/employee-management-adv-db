@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import EmployeeTable from "@/components/admin/employee-table";
 
 import api from "@/lib/api";
+import { Button } from "@/components/ui/button";
 
 export default function AdminEmployees() {
 
@@ -27,7 +28,11 @@ export default function AdminEmployees() {
                 Employees
             </h1>
 
-
+            <div className="flex justify-end">
+                <Button variant="outline" size="sm" className="mb-4">
+                    Add Employee
+                </Button>
+            </div>
             <EmployeeTable employees={employees} />
         </div>
     )
