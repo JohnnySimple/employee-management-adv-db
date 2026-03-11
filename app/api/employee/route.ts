@@ -6,7 +6,7 @@ export async function GET(){
     try{
         // Employee Details which includes department and jobtitle
         const employees=await prisma.employee.findMany({
-            where:{jobStatus:'ACTIVE'},
+            // where:{jobStatus:'ACTIVE'},
             include:{
                 department:true,
                 jobTitle:true
