@@ -106,7 +106,7 @@ export async function GET(){
 // }
 export async function POST(req: Request) {
 const text = await req.text();
-  console.log("Raw request body:", text);
+  // console.log("Raw request body:", text);
 
   let data;
   try {
