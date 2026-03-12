@@ -63,7 +63,7 @@ export async function POST(req:Request){
 
         // Validate hours worked
         const hoursWorked=Number(data.hoursWorked);
-        if(isNaN(hoursWorked) || hoursWorked <=0 || hoursWorked >24){
+        if(isNaN(hoursWorked) || hoursWorked <=0 || hoursWorked > 24){
             return NextResponse.json(
                 {error:"Invalid Hours Worked"},
                 {status:400}
@@ -115,6 +115,7 @@ export async function POST(req:Request){
         });
         return NextResponse.json(attendance,{status:201});
     }catch(error){
+        console.log(error);
         return NextResponse.json(
             {error:"Unable to create employee Attendance record"},
             {status:500}
