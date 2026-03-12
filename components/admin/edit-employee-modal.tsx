@@ -23,11 +23,63 @@ import axios from "axios";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { useEmployee } from "../providers/admin-employee-provider";
+import { useEffect } from "react";
+import api from "@/lib/api";
+
+const formSchema = z.object({
+    firstName: z.string().min(1, { message: "First name is required." }),
+    lastName: z.string().min(1, { message: "Last name is required." }),
+    dob: z.string().min(1, { message: "Date of birth is required." }),
+    hireDate: z.string().min(1, { message: "Hire date is required." }),
+    email: z.string().email({ message: "Please enter a valid email address." }),
+    phone: z.string().min(1, { message: "Phone number is required." }),
+    jobStatus: z.enum(["ACTIVE", "INACTIVE"], { message: "Please select a job status." }),
+    deptId: z.number({ message: "Please select a department." }),
+    jobTitleId: z.number({ message: "Please select a job title." })
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 
 export default function EditEmployeeModal() {
 
     const {isEditEmployeeModalOpen, closeEditEmployeeModal, selectedEmployee} = useEmployee();
+
+    const {
+        register,
+        handleSubmit,
+        control,
+        reset,
+        formState: { errors },
+    } = useForm<FormData>({
+        resolver: zodResolver(formSchema)
+    });
+
+    useEffect(() => {
+        if (selectedEmployee) {
+            reset({
+                firstName: selectedEmployee.firstName,
+                lastName: selectedEmployee.lastName,
+                dob: selectedEmployee.dob?.split("T")[0],
+                hireDate: selectedEmployee.hireDate?.split("T")[0],
+                email: selectedEmployee.email,
+                phone: selectedEmployee.phone,
+                jobStatus: selectedEmployee.jobStatus,
+                deptId: selectedEmployee.deptId,
+                jobTitleId: selectedEmployee.jobTitleId
+            })
+        }
+    }, [selectedEmployee, reset])
+
+    const updateEmployee = async (data: FormData) => {
+        try {
+            await api.put(`employee/${selectedEmployee.employeeId}`, data)
+            toast.success("Employee updated successfully")
+            closeEditEmployeeModal()
+        } catch (error) {
+            toast.error("Failed to update employee")
+        }
+    }
 
     if (!selectedEmployee) return null;
     return (
@@ -40,7 +92,7 @@ export default function EditEmployeeModal() {
                     Updating employee {selectedEmployee.firstName} {selectedEmployee.lastName}
                 </DialogDescription>
 
-                {/* <form onSubmit={handleSubmit(createNewEmployee)}>
+                <form onSubmit={handleSubmit(updateEmployee)}>
                     <CardContent className="space-y-4">
                         <div className="flex flex-row gap-4">
                             <div className="space-y-2 flex-1">
@@ -48,7 +100,6 @@ export default function EditEmployeeModal() {
                                 <Input
                                     id="firstName"
                                     type="text"
-                                    placeholder="Thomas"
                                     {...register("firstName")}
                                 />
                                 {errors.firstName && (
@@ -192,9 +243,9 @@ export default function EditEmployeeModal() {
                         </div>
                     </CardContent>
                     <CardFooter className="mt-8">
-                        <Button type="submit" className="w-full">Add Employee</Button>
+                        <Button type="submit" className="w-full">Update Employee</Button>
                     </CardFooter>
-                </form> */}
+                </form>
             </DialogContent>
         </Dialog>
     )
