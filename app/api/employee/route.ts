@@ -6,7 +6,7 @@ export async function GET(){
     try{
         // Employee Details which includes department and jobtitle
         const employees=await prisma.employee.findMany({
-            where:{jobStatus:'ACTIVE'},
+            // where:{jobStatus:'ACTIVE'},
             include:{
                 department:true,
                 jobTitle:true
@@ -106,7 +106,7 @@ export async function GET(){
 // }
 export async function POST(req: Request) {
 const text = await req.text();
-  console.log("Raw request body:", text);
+  // console.log("Raw request body:", text);
 
   let data;
   try {
