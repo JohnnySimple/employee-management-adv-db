@@ -10,8 +10,9 @@ import {
  } from "@/components/ui/table";
  import { cn } from "@/lib/utils";
 
- import {Employee} from "@/types/employee";
+import {Employee} from "@/types/employee";
 import { Card } from "../ui/card";
+import EmployeeActionsDropdown from "./employee-actions-dropdown";
 
 
  export default function EmployeeTable({ employees }: { employees: Employee[] }) {
@@ -28,6 +29,7 @@ import { Card } from "../ui/card";
                             <TableHead>Department</TableHead>
                             <TableHead>Job Title</TableHead>
                             <TableHead className="text-center">Job Status</TableHead>
+                            <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -43,6 +45,9 @@ import { Card } from "../ui/card";
                                 <TableCell className="text-sm font-medium">{employee.jobTitle.titleName}</TableCell>
                                 <TableCell className="text-center">
                                     {employee.jobStatus}
+                                </TableCell>
+                                <TableCell>
+                                    <EmployeeActionsDropdown employee={employee} />
                                 </TableCell>
                             </TableRow>
                         ))}

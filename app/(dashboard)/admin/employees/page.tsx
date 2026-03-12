@@ -26,6 +26,8 @@ import * as z from "zod";
 import axios from "axios";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
+import EditEmployeeModal from "@/components/admin/edit-employee-modal";
+import { AdminEmployeeProvider } from "@/components/providers/admin-employee-provider";
 
 const formSchema = z.object({
     firstName: z.string().min(1, { message: "First name is required." }),
@@ -45,6 +47,7 @@ export default function AdminEmployees() {
 
     const [employees, setEmployees] = useState([]);
     const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false);
+    // const [isEditEmployeeModalOpen, setIsEditEmployeeModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchEmployees = async () => {
@@ -96,6 +99,7 @@ export default function AdminEmployees() {
     }
 
     return (
+        <AdminEmployeeProvider>
         <div className="p-6">
             <Toaster />
             <h1 className="text-2xl font-semibold mb-6">
@@ -277,6 +281,10 @@ export default function AdminEmployees() {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            {/* Edit employee modal */}
+            <EditEmployeeModal />
         </div>
+        </AdminEmployeeProvider>
     )
 }
