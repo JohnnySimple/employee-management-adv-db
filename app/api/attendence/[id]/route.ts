@@ -6,22 +6,20 @@ export async function GET(req:Request,{params}:{params:{id:string}}){
     try{
         const {id}=await params;
         // Validate if Employee ID is a valid ID
-        const employeeId=Number(id);
-        if(isNaN(employeeId)){
-            return NextResponse.json({error:"Invalid Employee ID"},{status:400});
+        const attendanceId=Number(id);
+        if(isNaN(attendanceId)){
+            return NextResponse.json({error:`Invalid Attendance ID ${attendanceId}`},{status:400});
         }
         // Get the attendance records for the specified employee ID
-        const attendance=await prisma.attendance.findMany({
-            where:{employeeId},
-            orderBy:{
-                workDate:"desc"
-            }
+        const attendance=await prisma.attendance.findUnique({
+            where:{attendanceId}
         });
 
         // Check if attendance for specific employee ID exists
-        if(attendance.length===0){
-            return NextResponse.json({error:`Attendance Record for ${employeeId} not found`},{status:404});
+        if(!attendance){
+            return NextResponse.json({error:`Attendance Record for ${attendanceId} not found`},{status:404});
         };
+        
         return NextResponse.json(attendance);
     }catch(error){
         return NextResponse.json(
