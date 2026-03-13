@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import {prisma} from "@/lib/db";
-import { start } from "repl";
 
 // Retrieves List of ALL leave Requests
 export async function GET(){
