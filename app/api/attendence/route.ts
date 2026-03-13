@@ -1,18 +1,15 @@
 import { NextResponse } from "next/server";
 import {prisma} from "@/lib/db";
-import { error } from "node:console";
 
 // Get the list of all exployees along with their attendance records
 export async function GET(){
     try{
-        const employee=await prisma.employee.findMany({
-            where:{jobStatus:'ACTIVE'},
+        const employee=await prisma.attendance.findMany({
             include:{
-                attendance:{
-                    orderBy:{
-                        workDate:"desc"
-                    }
-                }
+                employee:true
+            },
+            orderBy:{
+                workDate:"desc"
             }
         });
         return NextResponse.json(employee);
