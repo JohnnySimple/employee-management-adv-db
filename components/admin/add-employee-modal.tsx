@@ -18,11 +18,12 @@ import { Label } from "@/components/ui/label";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import * as z from "zod";
+import axios from "axios";
 import { toast } from "sonner";
 import { useEmployee } from "../providers/admin-employee-provider";
-import { useEffect } from "react";
 import api from "@/lib/api";
 import { Department, JobTitle } from "@/types/employee";
+
 
 const formSchema = z.object({
     firstName: z.string().min(1, { message: "First name is required." }),
@@ -38,10 +39,9 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+export default function AddEmployeeModal() {
 
-export default function EditEmployeeModal() {
-
-    const {isEditEmployeeModalOpen, closeEditEmployeeModal, selectedEmployee, departments, jobTitles} = useEmployee();
+    const { isAddEmployeeModalOpen, closeAddEmployeeModal, setEmployees, departments, jobTitles } = useEmployee();
 
     const {
         register,
@@ -53,44 +53,40 @@ export default function EditEmployeeModal() {
         resolver: zodResolver(formSchema)
     });
 
-    useEffect(() => {
-        if (selectedEmployee) {
-            reset({
-                firstName: selectedEmployee.firstName,
-                lastName: selectedEmployee.lastName,
-                dob: selectedEmployee.dob?.split("T")[0],
-                hireDate: selectedEmployee.hireDate?.split("T")[0],
-                email: selectedEmployee.email,
-                phone: selectedEmployee.phone,
-                jobStatus: selectedEmployee.jobStatus,
-                deptId: selectedEmployee.deptId,
-                jobTitleId: selectedEmployee.jobTitleId
-            })
-        }
-    }, [selectedEmployee, reset])
-
-    const updateEmployee = async (data: FormData) => {
+    const createNewEmployee = async (data: FormData) => {
+        
         try {
-            await api.put(`employee/${selectedEmployee.employeeId}`, data)
-            toast.success("Employee updated successfully")
-            closeEditEmployeeModal()
+            const addResponse =await axios.post("/api/employee", data);
+            // setIsAddEmployeeModalOpen(false);
+            closeAddEmployeeModal();
+            
+            if (addResponse.status === 201) {
+                // Refresh employee list after adding new employee
+                const response = await api.get("/employee");
+                setEmployees(response.data.employees);
+                reset();
+                toast.success("Employee added successfully!");
+            } else {
+                toast.error("Failed to add employee.");
+            }
+            
         } catch (error) {
-            toast.error("Failed to update employee")
+            console.error("Error creating employee:", error);
+            toast.error("Failed to add employee.");
         }
     }
-
-    if (!selectedEmployee) return null;
+    
     return (
-        <Dialog open={isEditEmployeeModalOpen} onOpenChange={closeEditEmployeeModal}>
+        <Dialog open={isAddEmployeeModalOpen} onOpenChange={closeAddEmployeeModal}>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>Edit Employee</DialogTitle>
+                    <DialogTitle>Add Employee</DialogTitle>
                 </DialogHeader>
                 <DialogDescription>
-                    Updating employee {selectedEmployee.firstName} {selectedEmployee.lastName}
+                    Fill in the details for the new employee.
                 </DialogDescription>
 
-                <form onSubmit={handleSubmit(updateEmployee)}>
+                <form onSubmit={handleSubmit(createNewEmployee)}>
                     <CardContent className="space-y-4">
                         <div className="flex flex-row gap-4">
                             <div className="space-y-2 flex-1">
@@ -98,6 +94,7 @@ export default function EditEmployeeModal() {
                                 <Input
                                     id="firstName"
                                     type="text"
+                                    placeholder="Thomas"
                                     {...register("firstName")}
                                 />
                                 {errors.firstName && (
@@ -250,7 +247,7 @@ export default function EditEmployeeModal() {
                         </div>
                     </CardContent>
                     <CardFooter className="mt-8">
-                        <Button type="submit" className="w-full">Update Employee</Button>
+                        <Button type="submit" className="w-full">Add Employee</Button>
                     </CardFooter>
                 </form>
             </DialogContent>
