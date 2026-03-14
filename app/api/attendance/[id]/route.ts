@@ -40,11 +40,6 @@ export async function PUT(req:Request,{params}:{params:{id:string}}){
 
         const data=await req.json();
         console.log(data);
-        // Check if employeeId Exists
-        const employeeId=Number(data.employeeId);
-        if(isNaN(employeeId)){
-            return NextResponse.json({error:"Invalid Employee ID"},{status:400});   
-        }
 
         // Convert Date object to date type Validate
         const workDate=new Date(data.workDate);
