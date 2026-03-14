@@ -2,25 +2,45 @@
 import { NextResponse } from "next/server";
 import {prisma} from "@/lib/db"
 
-//Get method to retrieve project information
-export async function GET(){
+const validStatuses = ["ACTIVE", "INACTIVE"] as const;
+type ValidStatus = (typeof validStatuses)[number];
 
-    try{
-        const projects=await prisma.project.findMany({
-            include:{
-                assigned:true
-            },
-        });
+// GET method to retrieve projects with soft-delete support
+export async function GET(req: Request) {
+  try {
+    // Parse query parameter
+    const url = new URL(req.url);
+    const statusParamRaw = url.searchParams.get("status"); // "ACTIVE", "INACTIVE", "ALL", or null
+
+    let statusFilter: ValidStatus | undefined;
+
+    if (statusParamRaw && statusParamRaw !== "ALL") {
+      if (validStatuses.includes(statusParamRaw as ValidStatus)) {
+        statusFilter = statusParamRaw as ValidStatus;
+      } else {
+        return NextResponse.json(
+          { error: "Invalid status query parameter. Must be ACTIVE, INACTIVE, or ALL." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Build Prisma where clause
+    const whereClause = statusFilter ? { status: statusFilter } : {};
+
+    const projects = await prisma.project.findMany({
+      where: whereClause,
+      orderBy: { startDate: "asc" } // optional: sort by startDate
+    });
 
     return NextResponse.json(projects);
-
-    }catch(error){
-        console.error(error);
-        return NextResponse.json(
-            {error: "Unable to Retrieve Project Data"},
-            {status: 500 }
-        );
-    }
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Unable to retrieve project data" },
+      { status: 500 }
+    );
+  }
 }
 
 // POST method to create a new project record
