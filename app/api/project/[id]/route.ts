@@ -130,3 +130,33 @@ export async function PATCH(req: Request, context: { params: { id: string } } ){
         );
     }
 }
+
+
+//Delete method to soft delete a project record based on Id, will set status to INACTIVE
+export async function DELETE(req: Request, context: { params: { id: string } } ){
+    try{
+        const params = await context.params;
+
+        const projectId = Number(params.id);
+
+        if (isNaN(projectId)) {
+            return NextResponse.json({ error: "Invalid Project ID" }, { status: 400 });
+        }
+        
+        const deletedProject = await prisma.project.update({
+            where: { projectId },
+            data: {
+                status: "INACTIVE"
+            }
+        });
+
+        return NextResponse.json(deletedProject);
+
+    }catch(error){
+        console.error(error);
+        return NextResponse.json(
+            {error: "Unable to Delete Project Record"},
+             {status: 500 }
+         );
+    }
+}
