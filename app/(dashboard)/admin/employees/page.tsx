@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/sonner";
 import EditEmployeeModal from "@/components/admin/edit-employee-modal";
 import { useEmployee } from "@/components/providers/admin-employee-provider";
 import AddEmployeeModal from "@/components/admin/add-employee-modal";
+import CreateUserAccountModal from "@/components/admin/create-user-account-modal";
 
 export default function AdminEmployees() {
 
@@ -32,6 +33,9 @@ export default function AdminEmployees() {
 
             {/* Edit employee modal */}
             <EditEmployeeModal />
+
+            {/* Create user account modal */}
+            <CreateUserAccountModal />
         </div>
     )
 }

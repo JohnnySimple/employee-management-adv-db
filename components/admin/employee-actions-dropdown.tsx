@@ -9,7 +9,7 @@ import { Employee } from "@/types/employee";
 
 export default function EmployeeActionsDropdown({ employee }: { employee: Employee }) {
 
-    const { openEditEmployeeModal } = useEmployee();
+    const { openEditEmployeeModal, openCreateUserAccountModal } = useEmployee();
 
     return (
         <DropdownMenu>
@@ -22,6 +22,15 @@ export default function EmployeeActionsDropdown({ employee }: { employee: Employ
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => openEditEmployeeModal(employee)}>
                     Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openCreateUserAccountModal(employee)}>
+                    Create Account
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    Disable Account
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    Reset Password
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
