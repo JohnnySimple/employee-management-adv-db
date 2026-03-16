@@ -113,7 +113,11 @@ async function main() {
     /**
      * USERS
      */
-    const password = await bcrypt.hash(process.env.TEST_PASSWORD, 10)
+    const rawPassword = process.env.TEST_PASSWORD;
+    if (!rawPassword) {
+        throw new Error("TEST_PASSWORD environment variable is not set.")
+    }
+    const password = await bcrypt.hash(rawPassword, 10)
 
     await prisma.user.create({
         data: {
@@ -198,17 +202,21 @@ async function main() {
             {
                 employeeId: employee1.employeeId,
                 workDate: new Date(),
+                timeIn: new Date(),
+                // timeOut: new Date(),
                 hoursWorked: 8,
                 overtimeHours: 1
             },
             {
                 employeeId: employee2.employeeId,
                 workDate: new Date(),
+                timeIn: new Date(),
+                // timeOut: new Date(), optional
                 hoursWorked: 7.5,
                 overtimeHours: 0
             }
         ]
-    })
+    });
 
     /**
      * EMPLOYEE LEAVE
