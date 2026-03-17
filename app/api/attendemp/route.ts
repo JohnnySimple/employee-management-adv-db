@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 
 
 // Verify JWT and extract user info
-async function verifyToken(req:Request) {
+export async function verifyToken(req:Request) {
     const cookieStore=await cookies();
     console.log("Cookies:", cookieStore.getAll());
 
