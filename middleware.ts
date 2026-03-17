@@ -22,7 +22,7 @@ export async function middleware(req: NextRequest) {
 
     try {
         const { payload } = await jwtVerify(token, secret)
-        const role = payload.role as string
+        const role = payload.role as string;
         const path = req.nextUrl.pathname
 
         // protect admin routes
@@ -52,6 +52,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
     matcher: [
         "/api/protected/:path*",
-        "/admin/:path*"
+        "/admin/:path*",
+        "/api/attendemp/:path*",
     ],
 }
