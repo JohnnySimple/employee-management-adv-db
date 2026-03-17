@@ -1,6 +1,40 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { jwtVerify } from "jose";
+import { jwt } from "zod";
+
+// Retrives the list of attendance records for the authenticated employee
+export async function GET(req:Request) {
+    try{
+        let authHeader: string | null = null;
+        if (req) authHeader = req.headers.get("authorization");
+        const headerToken = authHeader?.startsWith("Bearer ")
+        ? authHeader.split(" ")[1]
+        : null;
+
+        const token = headerToken;
+
+         const secret=new TextEncoder().encode(process.env.JWT_SECRET);
+
+        const { payload } = await jwtVerify(token, secret)
+
+        const employeeId = payload.employeeId as number;
+
+        // Get attendance records for the employee
+        const attendanceRecords=await prisma.attendance.findMany({
+            where : { employeeId },
+            orderBy: { workDate: "desc" }
+        });
+
+        return NextResponse.json(attendanceRecords);
+    } catch(error){
+        console.log(error);
+        return NextResponse.json(
+            { error: { message: "Unable to fetch attendance records" } },
+            { status: 401 }
+        );
+    }
+}
 
 // Clock in for authorized employee
 export async function POST(req:Request){
