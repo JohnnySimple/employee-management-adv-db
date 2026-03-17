@@ -11,7 +11,7 @@ export async function GET() {
     }
 }
 
-export async function POST(req:Request){
+export async function POST(req:Request) {
     try{
         const body:{name:string, email:string, employeeId: Number, password: string, role: string} = await req.json();
         
