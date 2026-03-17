@@ -89,6 +89,7 @@ export default function CreateUserAccountModal() {
                                     id="name"
                                     type="text"
                                     placeholder="Thomas"
+                                    disabled
                                     {...register("name")}
                                 />
                                 {errors.name && (

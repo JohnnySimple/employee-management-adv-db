@@ -13,7 +13,8 @@ export function AdminEmployeeProvider({ children }: { children: ReactNode }) {
     const [jobTitles, setJobTitles] = useState([]);
     const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false);
     const [isEditEmployeeModalOpen, setIsEditEmployeeModalOpen] = useState(false);
-    const [isCreateUserAccountModalOpen, setIsCreateUserAccountModalOpen] = useState(false)
+    const [isCreateUserAccountModalOpen, setIsCreateUserAccountModalOpen] = useState(false);
+    const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
     function openAddEmployeeModal() {
@@ -23,7 +24,6 @@ export function AdminEmployeeProvider({ children }: { children: ReactNode }) {
     function closeAddEmployeeModal() {
         setIsAddEmployeeModalOpen(false);
     }
-
 
     function openEditEmployeeModal(employee: Employee) {
         setSelectedEmployee(employee);
@@ -42,6 +42,16 @@ export function AdminEmployeeProvider({ children }: { children: ReactNode }) {
 
     function closeCreateUserAccountModal() {
         setIsCreateUserAccountModalOpen(false);
+        setSelectedEmployee(null);
+    }
+
+    function openResetPasswordModal(employee: Employee) {
+        setSelectedEmployee(employee);
+        setIsResetPasswordModalOpen(true);
+    }
+
+    function closeResetPasswordModal() {
+        setIsResetPasswordModalOpen(false);
         setSelectedEmployee(null);
     }
 
@@ -89,6 +99,7 @@ export function AdminEmployeeProvider({ children }: { children: ReactNode }) {
             isAddEmployeeModalOpen, employees, openAddEmployeeModal, closeAddEmployeeModal, setEmployees,
             isEditEmployeeModalOpen, selectedEmployee, openEditEmployeeModal, closeEditEmployeeModal,
             isCreateUserAccountModalOpen, openCreateUserAccountModal, closeCreateUserAccountModal,
+            isResetPasswordModalOpen, openResetPasswordModal, closeResetPasswordModal,
             departments, jobTitles
         }}>
             { children }

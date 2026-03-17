@@ -9,6 +9,7 @@ import EditEmployeeModal from "@/components/admin/edit-employee-modal";
 import { useEmployee } from "@/components/providers/admin-employee-provider";
 import AddEmployeeModal from "@/components/admin/add-employee-modal";
 import CreateUserAccountModal from "@/components/admin/create-user-account-modal";
+import ResetPasswordModal from "@/components/admin/reset-password-modal";
 
 export default function AdminEmployees() {
 
@@ -36,6 +37,9 @@ export default function AdminEmployees() {
 
             {/* Create user account modal */}
             <CreateUserAccountModal />
+
+            {/* Reset password modal */}
+            <ResetPasswordModal />
         </div>
     )
 }
