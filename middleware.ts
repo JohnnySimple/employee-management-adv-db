@@ -40,6 +40,14 @@ export async function middleware(req: NextRequest) {
             return NextResponse.redirect(new URL("/admin", req.url))
         }
 
+        // API routes
+        if (path.startsWith("/api/protected/admin") && role !== "ADMIN") {
+            return NextResponse.json(
+                { error: "Forbidden" },
+                { status: 403 }
+            )
+        }
+
         return NextResponse.next()
     } catch (error) {
         return NextResponse.json(
