@@ -1,4 +1,12 @@
 
+export interface CheckedInEmployee {
+    employeeId: number
+    firstName: string
+    lastName: string
+    timeIn: Date
+    timeOut: Date | null
+}
+
 export interface AdminStats {
     employeesCount: {
         active: number
@@ -27,4 +35,7 @@ export interface AdminStats {
     activeAssignedEmployeeCount: number
     uniqueProjectsWithAssignmentCount: number
     checkedInEmployeeCount: number
+    checkedInEmployees: CheckedInEmployee[]
+    clockedInCount: number
+    clockedOutCount: number
 }

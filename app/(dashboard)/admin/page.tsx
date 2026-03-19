@@ -6,6 +6,8 @@ import { Users } from "lucide-react";
 import api from "@/lib/api";
 import { AdminStats } from "@/types/AdminStats";
 import TestChart from "@/components/admin/test-chart";
+import EmployeeClockInTable from "@/components/admin/employee-clockin-table";
+
 
 export default function AdminHome() {
 
@@ -127,7 +129,7 @@ export default function AdminHome() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              Table here
+              <EmployeeClockInTable clockIns={stats?.checkedInEmployees ?? []} />
             </CardContent>
           </Card>
         </div>
