@@ -68,8 +68,10 @@ model Attendance {
   attendanceId  Int      @id @default(autoincrement())
   employeeId    Int
   workDate      DateTime
-  hoursWorked   Float
-  overtimeHours Float
+  timeIn        DateTime
+  timeOut       DateTime?
+  hoursWorked   Float?
+  overtimeHours Float?
   employee      Employee @relation(fields: [employeeId], references: [employeeId])
 }
 
