@@ -63,5 +63,6 @@ export const config = {
         "/admin/:path*",
         "/api/attendemp/:path*",
         "/api/salaryemp/:path*",
+        "/api/leaveemp/:path*"
     ],
 }
