@@ -33,6 +33,18 @@ export async function GET() {
         // get all projects, group by project and count employees in each project
         const projects = await prisma.project.findMany()
 
+        const activeProjectCount = await prisma.project.count({
+            where: {
+                status: "ACTIVE"
+            }
+        })
+
+        const inactiveProjectCount = await prisma.project.count({
+            where: {
+                status: "INACTIVE"
+            }
+        })
+
         // total assignments
         const totalAssignments = await prisma.projectAssigned.count();
 
@@ -77,8 +89,19 @@ export async function GET() {
             }
         })
 
+        // get employees currently checked in (attendance)
+        const today = new Date();
+        const checkedInEmployeeCount = await prisma.attendance.count({
+            where: {
+                timeIn: {
+                    gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
+                },
+                // timeOut: null
+            }
+        })
+
         return NextResponse.json({
-            "employees": {
+            "employeesCount": {
                 "active": activeEmployees,
                 "inactive": inactiveEmployees,
                 "total": activeEmployees + inactiveEmployees
@@ -89,7 +112,13 @@ export async function GET() {
                 manager: dept.manager ? `${dept.manager.firstName} ${dept.manager.lastName}` : "No Manager",
                 employeeCount: dept._count.employees
             })),
+            "departmentCount": departments.length,
             "projects": projects,
+            "projectCount": {
+                "active": activeProjectCount,
+                "inactive": inactiveProjectCount,
+                "total": activeProjectCount + inactiveProjectCount
+            },
             "totalAssignments": totalAssignments,
             "activeAssignedEmployeeCount": activeAssignedEmployeeCount,
             "uniqueProjectCount": uniqueProjectCount,
@@ -104,7 +133,8 @@ export async function GET() {
             "assignmentsOverTime": assignmentsOverTime.map(at => ({
                 assignedDate: at.assignedDate,
                 assignmentCount: at._count.assignId
-            }))
+            })),
+            "checkedInEmployeeCount": checkedInEmployeeCount
         })
 
     } catch (error) {

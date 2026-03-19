@@ -1,10 +1,30 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Users } from "lucide-react";
+import api from "@/lib/api";
+import { AdminStats } from "@/types/AdminStats";
+import TestChart from "@/components/admin/test-chart";
 
 export default function AdminHome() {
-    return (
+
+  const [stats, setStats] = useState<AdminStats | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get("/protected/admin/stats");
+        setStats(response.data);
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  return (
     // <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans">
     //   Admin home dashboard
     // </div>
@@ -21,9 +41,9 @@ export default function AdminHome() {
               <Users className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">120</div>
+              <div className="text-2xl font-bold">{ stats?.employeesCount?.total }</div>
               <p className="text-xs text-muted-foreground">
-                +5 this month
+                { stats?.employeesCount?.active } Active, { stats?.employeesCount?.inactive } Inactive
               </p>
             </CardContent>
           </Card>
@@ -38,9 +58,9 @@ export default function AdminHome() {
               <Users className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">4</div>
+              <div className="text-2xl font-bold">{ stats?.projects.length }</div>
               <p className="text-xs text-muted-foreground">
-                1 Inactive
+                { stats?.projectCount.inactive } Inactive
               </p>
             </CardContent>
           </Card>
@@ -55,7 +75,7 @@ export default function AdminHome() {
               <Users className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5</div>
+              <div className="text-2xl font-bold">{ stats?.departmentCount }</div>
               <p className="text-xs text-muted-foreground">
                 All Inclusive
               </p>
@@ -72,7 +92,7 @@ export default function AdminHome() {
               <Users className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">92</div>
+              <div className="text-2xl font-bold">{ stats?.checkedInEmployeeCount }</div>
               <p className="text-xs text-muted-foreground">
                 Live Attendance
               </p>
@@ -92,8 +112,8 @@ export default function AdminHome() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
-                Chart here
+              <div className="space-y-4">
+                <TestChart />
               </div>
             </CardContent>
           </Card>
