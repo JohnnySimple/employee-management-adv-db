@@ -95,8 +95,7 @@ export async function GET() {
             where: {
                 timeIn: {
                     gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
-                },
-                // timeOut: null
+                }
             }
         })
 
@@ -104,13 +103,36 @@ export async function GET() {
             where: {
                 timeIn: {
                     gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
-                },
-                timeOut: null
+                }
             },
+            orderBy: [
+                {
+                    timeOut: { sort: "asc", nulls: "first" } // show those who haven't checked out at the top
+                },
+                {
+                    timeIn: "desc" // among those who haven't checked out, show the most recent check-ins first
+                }
+            ],
             include: {
                 employee: true
             }
         })
+
+        // sample transaction to demonstrate how to run multiple queries in a single transaction
+        const [clockedInCount, clockedOutCount] = await prisma.$transaction([
+            prisma.attendance.count({
+                where: {
+                    timeIn: { gte: new Date(today.setHours(0, 0, 0, 0)) },
+                    timeOut: null
+                }
+            }),
+            prisma.attendance.count({
+                where: {
+                    timeIn: { gte: new Date(today.setHours(0, 0, 0, 0)) },
+                    timeOut: { not: null }
+                }
+            })
+        ])
 
         return NextResponse.json({
             "employeesCount": {
@@ -151,8 +173,11 @@ export async function GET() {
                 employeeId: emp.employeeId,
                 firstName: emp.employee.firstName,
                 lastName: emp.employee.lastName,
-                timeIn: emp.timeIn
-            }))
+                timeIn: emp.timeIn,
+                timeOut: emp.timeOut
+            })),
+            "clockedInCount": clockedInCount,
+            "clockedOutCount": clockedOutCount
         })
 
     } catch (error) {
