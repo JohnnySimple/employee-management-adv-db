@@ -100,6 +100,18 @@ export async function GET() {
             }
         })
 
+        const checkedInEmployees = await prisma.attendance.findMany({
+            where: {
+                timeIn: {
+                    gte: new Date(today.getFullYear(), today.getMonth(), today.getDate())
+                },
+                timeOut: null
+            },
+            include: {
+                employee: true
+            }
+        })
+
         return NextResponse.json({
             "employeesCount": {
                 "active": activeEmployees,
@@ -134,7 +146,13 @@ export async function GET() {
                 assignedDate: at.assignedDate,
                 assignmentCount: at._count.assignId
             })),
-            "checkedInEmployeeCount": checkedInEmployeeCount
+            "checkedInEmployeeCount": checkedInEmployeeCount,
+            "checkedInEmployees": checkedInEmployees.map(emp => ({
+                employeeId: emp.employeeId,
+                firstName: emp.employee.firstName,
+                lastName: emp.employee.lastName,
+                timeIn: emp.timeIn
+            }))
         })
 
     } catch (error) {
