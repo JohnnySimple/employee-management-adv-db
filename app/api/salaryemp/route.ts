@@ -3,7 +3,7 @@ import {prisma} from "@/lib/db";
 import { jwtVerify } from "jose";
 
 
-// Retrive list of paydates, and salary details for the authenticated employee
+// Retrive list of paydates, and salary details for authenticated employee
 export async function GET(req:Request){
     try{
         let authHeader:string | null= null;
