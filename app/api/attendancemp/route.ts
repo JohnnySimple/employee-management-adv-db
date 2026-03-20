@@ -11,7 +11,7 @@ export async function GET(req:Request) {
         ? authHeader.split(" ")[1]
         : null;
 
-        const token = headerToken;
+        const token= headerToken;
 
          const secret=new TextEncoder().encode(process.env.JWT_SECRET);
 
@@ -85,6 +85,7 @@ export async function POST(req:Request){
 
 // Clock out for authorized employee
 export async function PUT(req:Request){
+    
     try{
         let authHeader:string | null=null;
         if(req) authHeader=req.headers.get("authorization");
