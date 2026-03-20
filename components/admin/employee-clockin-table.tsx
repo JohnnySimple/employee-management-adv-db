@@ -14,7 +14,7 @@ import { Card } from "../ui/card";
 import { AdminStats, CheckedInEmployee } from "@/types/AdminStats";
 
 
-export default function EmployeeClockInTable({ clockIns }: { clockIns: CheckedInEmployee[] }) {
+export default function EmployeeClockInTable({ clockIns }: { clockIns: AdminStats["employeesClockedInToday"] }) {
 
     console.log(clockIns);
 
@@ -45,8 +45,14 @@ export default function EmployeeClockInTable({ clockIns }: { clockIns: CheckedIn
                                 )}>
                                 <TableCell className="text-sm font-medium">{clockIn.employeeId}</TableCell>
                                 <TableCell className="">{clockIn.firstName} {clockIn.lastName}</TableCell>
-                                <TableCell className="text-sm text-muted-foreground">{new Date(clockIn.timeIn).toLocaleTimeString()}</TableCell>
-                                <TableCell className="text-sm text-muted-foreground">{clockIn.timeOut ? new Date(clockIn.timeOut).toLocaleTimeString() : "Still Clocked In"}</TableCell>
+                                <TableCell className="text-sm text-muted-foreground">{clockIn.attendance.length > 0 ? new Date(clockIn.attendance[0]?.timeIn).toLocaleTimeString() : "N/A"}</TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                    {(() => {
+                                        if (clockIn.attendance.length === 0) return <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">Absent</span>;
+                                        const timeOut = clockIn.attendance[0]?.timeOut;
+                                        return timeOut ? <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">{new Date(timeOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span> : <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 border border-green-200">Still Clocked In</span>;
+                                    })()}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

@@ -99,6 +99,22 @@ export async function GET() {
             }
         })
 
+        // get all employees both clocked in and clocked out or absent for today
+        const employeesClockedInToday = await prisma.employee.findMany({
+            include: {
+                attendance: {
+                    where: {
+                        workDate: {
+                            gte: new Date(today.setHours(0, 0, 0, 0)),
+                        }
+                    },
+                    orderBy: {
+                        timeIn: "desc"
+                    }
+                }
+            }
+        })
+
         const checkedInEmployees = await prisma.attendance.findMany({
             where: {
                 timeIn: {
@@ -177,7 +193,17 @@ export async function GET() {
                 timeOut: emp.timeOut
             })),
             "clockedInCount": clockedInCount,
-            "clockedOutCount": clockedOutCount
+            "clockedOutCount": clockedOutCount,
+            "employeesClockedInToday": employeesClockedInToday.map(emp => ({
+                employeeId: emp.employeeId,
+                firstName: emp.firstName,
+                lastName: emp.lastName,
+                attendance: emp.attendance.map(att => ({
+                    workDate: att.workDate,
+                    timeIn: att.timeIn,
+                    timeOut: att.timeOut
+                }))
+            }))
         })
 
     } catch (error) {

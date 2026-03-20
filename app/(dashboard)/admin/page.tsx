@@ -145,7 +145,7 @@ export default function AdminHome() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <EmployeeClockInTable clockIns={stats?.checkedInEmployees ?? []} />
+              <EmployeeClockInTable clockIns={stats?.employeesClockedInToday ?? []} />
             </CardContent>
           </Card>
         </div>

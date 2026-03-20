@@ -37,5 +37,15 @@ export interface AdminStats {
     checkedInEmployeeCount: number
     checkedInEmployees: CheckedInEmployee[]
     clockedInCount: number
-    clockedOutCount: number
+    clockedOutCount: number,
+    employeesClockedInToday: {
+        employeeId: number
+        firstName: string
+        lastName: string
+        attendance: {
+            workDate: Date
+            timeIn: Date
+            timeOut: Date | null
+        }[]
+    }[]
 }
