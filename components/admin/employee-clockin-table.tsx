@@ -31,6 +31,13 @@ export default function EmployeeClockInTable({ clockIns }: { clockIns: CheckedIn
                         </TableRow>
                     </TableHeader>
                     <TableBody>
+                        {clockIns?.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                                    No employees currently clocked in.
+                                </TableCell>
+                            </TableRow>
+                        )}
                         {clockIns?.map((clockIn, index) => (
                             <TableRow key={index}
                                 className={cn("transition-colors hover:bg-muted/50",

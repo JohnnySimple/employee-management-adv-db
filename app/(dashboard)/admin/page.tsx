@@ -7,11 +7,13 @@ import api from "@/lib/api";
 import { AdminStats } from "@/types/AdminStats";
 import TestChart from "@/components/admin/test-chart";
 import EmployeeClockInTable from "@/components/admin/employee-clockin-table";
+import TotalHoursWorkedChart from "@/components/admin/total-hours-worked-chart";
 
 
 export default function AdminHome() {
 
   const [stats, setStats] = useState<AdminStats | null>(null);
+  const [hoursWorkedData, setHoursWorkedData] = useState<{ date: string, totalHours: number }[]>([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -24,6 +26,19 @@ export default function AdminHome() {
     };
 
     fetchStats();
+  }, []);
+
+  useEffect(() => {
+    const fetchHoursWorked = async () => {
+      try {
+        const response = await api.get("/protected/admin/stats/hours-worked?days=7");
+        setHoursWorkedData(response.data);
+      } catch (error) {
+        console.error("Error fetching hours worked data:", error);
+      }
+    };
+
+    fetchHoursWorked();
   }, []);
 
   return (
@@ -115,7 +130,8 @@ export default function AdminHome() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <TestChart />
+                {/* <TestChart /> */}
+                <TotalHoursWorkedChart data={hoursWorkedData} />
               </div>
             </CardContent>
           </Card>
