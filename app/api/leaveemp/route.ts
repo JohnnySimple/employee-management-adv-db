@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { jwtVerify } from "jose";
-import { jwt } from "zod";
 
 // Retrieves all leave records for an authenticated employee
 export async function GET(req:Request){
@@ -99,6 +98,18 @@ export async function POST(req:Request){
             return NextResponse.json({error:{message:"You have sufficient leave balance. No need to submit leave request."}} , {status:400});
         }
 
+        // Prevent Overlapping leave requests
+        const overlappingLeave=await prisma.leaveDate.findFirst({
+            where:{employeeLeaveId:employeeLeave.employeeLeaveId,
+                status:"Pending",
+                startDate:{lte:end},
+                endDate:{gte:start}
+            }
+        });
+        if(overlappingLeave){
+            return NextResponse.json({error:{message:"You have an overlapping leave request. Please adjust your dates and try again."}} , {status:400});
+        }
+
         // Create a new Leave Request
         const newLeaveRequest=await prisma.leaveDate.create({
             data:{
@@ -118,3 +129,83 @@ export async function POST(req:Request){
 }
 
 //  Update leave request status by employee
+export async function PUT(req:Request){
+    try{
+        let authHeader=req.headers.get("Authorization");
+        const headerToken=authHeader?.startsWith("Bearer") ?
+        authHeader.split(" ")[1] : null;
+
+        const token=headerToken;
+        if(!token){
+            return NextResponse.json({error:{message:"Authorization token missing"}} , {status:401});
+        }
+
+        const {payload}=await jwtVerify(token,new TextEncoder().encode(process.env.JWT_SECRET!))
+        const employeeId=payload.employeeId as number;
+
+        const {leaveDateId}=await req.json();
+
+        // check if leave request exists and belongs to the employee
+        const leaveReq=await prisma.leaveDate.findUnique({
+            where:{leaveDateId},
+            include:{
+                employeeLeave:true
+            }
+        });
+
+        if(!leaveReq || leaveReq.employeeLeave.employeeId !==employeeId){
+            return NextResponse.json({error:{message:"Leave request not found or does not belong to the authenticated employee."}} , {status:404});
+        }
+
+        // check if status is pending before allowing cancellation or changing status
+        if(leaveReq.status !=="Pending"){
+            return NextResponse.json({error:{message:"Only pending leave requests can be cancelled or updated."}} , {status:400});
+        }
+
+        const startdate=new Date(leaveReq.startDate);
+        const enddate=new Date(leaveReq.endDate);
+
+        // Validate data fields to date objects
+        if(isNaN(startdate.getTime()) || isNaN(enddate.getTime())){
+            return NextResponse.json({error:{message:"Invalid date format, please provide valid start and end dates."}} , {status:400});
+        }
+
+        if(startdate >enddate){
+            return NextResponse.json({error:{message:"Start date cannot be after end date."}} , {status:400});
+        }
+
+        // Calculate hours'
+        const oldHoursOff=leaveReq.hoursOff;
+        const days=(enddate.getTime() - startdate.getTime())/(1000*60*60*24)+1;
+        const newHoursOff=days*8;
+
+        const balance=leaveReq.employeeLeave;;
+
+        // adjust remaining balance by adding back old hours and checking ig new hours exceed balance
+        const adjustedBalance=balance.totalRemaining + oldHoursOff - newHoursOff;
+
+        if(adjustedBalance <0){
+            return NextResponse.json({error:{message:"Insufficient Leave balance "}} , {status:400});
+        }
+        // Update balance 
+        await prisma.employeeLeave.update({
+            where:{employeeLeaveId:balance.employeeLeaveId},
+            data:{totalRemaining:adjustedBalance},
+        })
+
+        // Update the leave request status
+        const updated=await prisma.leaveDate.update({
+            where:{leaveDateId},
+            data:{
+                startDate:startdate,
+                endDate:enddate,
+                hoursOff:newHoursOff,
+                status:"Approved"
+            }
+        });
+        return NextResponse.json({message:"Leave request status updated successfully",updated},{status:200});
+    }catch(error){
+        console.log(error);
+        return NextResponse.json({error:{message:"Unable to update leave request status"}} , {status:500});
+    }
+}
