@@ -110,7 +110,8 @@ export async function GET() {
                     },
                     orderBy: {
                         timeIn: "desc"
-                    }
+                    },
+                    take: 1
                 }
             }
         })
