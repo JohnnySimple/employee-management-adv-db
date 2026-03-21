@@ -13,6 +13,7 @@ export default function EmployeeHome() {
 
     const [attendance, setAttendance] = useState([]);
     const [user, setUser] = useState(null);
+    const [stats, setStats] = useState(null);
 
     // get logged in employee from token
     useEffect(() => {
@@ -41,6 +42,23 @@ export default function EmployeeHome() {
         };
 
         fetchAttendance();
+    }, [user]);
+
+    // fetch employee stats
+    useEffect(() => {
+      if (!user) return;
+
+      const fetchStats = async () => {
+        try {
+          const response = await api.get(`/employee/${user?.employeeId}/stats`);
+          setStats(response.data);
+          console.log(response.data);
+        } catch (error) {
+          console.error("Error fetching stats:", error);
+        }
+      };
+
+      fetchStats();
     }, [user]);
 
     const clockIn = async () => {
@@ -114,7 +132,7 @@ export default function EmployeeHome() {
               <Users className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">2</div>
+              <div className="text-2xl font-bold">{stats?.activeProjectCount ?? 0}</div>
               <p className="text-xs text-muted-foreground">
                 Active project assignments
               </p>
@@ -242,18 +260,18 @@ export default function EmployeeHome() {
 
         {/* Active Projects Card */}
         <div className="lg:w-80 xl:w-96">
-          <Card className="h-full border-0 shadow-sm">
+          <Card className=" border-0 shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-xl font-semibold flex items-center gap-2">
                 <FolderOpen className="h-5 w-5 text-primary" />
                 Active Projects
               </CardTitle>
               <CardDescription>
-                projects in progress
+                Projects in progress
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {[
+              {/* {[
                 { name: "Dashboard Redesign", progress: 75, deadline: "Dec 15", priority: "high", color: "bg-blue-500" },
                 { name: "API Integration", progress: 30, deadline: "Dec 20", priority: "medium", color: "bg-yellow-500" },
                 { name: "Mobile App", progress: 90, deadline: "Dec 10", priority: "urgent", color: "bg-red-500" },
@@ -276,7 +294,39 @@ export default function EmployeeHome() {
                     />
                   </div>
                 </div>
-              ))}
+              ))} */}
+              {stats?.activeProjects.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-10">
+                  No active projects assigned.
+                </p>
+              ) : (
+                stats?.activeProjects.map((assignment: any, i: number) => {
+                  let progress = Math.floor(Math.random() * 100); // Placeholder for actual progress calculation
+                  // random color based on list of colors
+                  const colors = ["bg-blue-500", "bg-yellow-500", "bg-red-500", "bg-green-500"];
+                  const color = colors[i % colors.length];
+                  
+                  return (
+                    <div key={i} className="space-y-2 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-sm">{assignment.project.projectName}</p>
+                          </div>
+                          <p className="text-xs text-muted-foreground">Due {new Date(assignment.project.endDate).toLocaleDateString()}</p>
+                        </div>
+                        <p className="text-sm font-mono font-medium">{progress}%</p>
+                      </div>
+                      <div className="w-full bg-muted rounded-full h-2">
+                        <div 
+                          className={`${color} h-2 rounded-full transition-all duration-300`}
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })
+              )}
             </CardContent>
           </Card>
         </div>
