@@ -5,7 +5,8 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { FolderOpen, Play, Plus, Square, Users } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Badge, Clock } from "lucide-react";
+import { Badge, Clock, Loader } from "lucide-react";
+import { toast, Toaster } from "sonner";
 
 
 export default function EmployeeHome() {
@@ -32,7 +33,7 @@ export default function EmployeeHome() {
         // Fetch attendance data for the employee
         const fetchAttendance = async () => {
             try {
-                const response = await api.get(`/employee/${user?.employeeId}/attendance`); // Replace with actual employee ID
+                const response = await api.get(`/employee/${user?.employeeId}/attendance`);
                 setAttendance(response.data);
             } catch (error) {
                 console.error("Error fetching attendance data:", error);
@@ -42,11 +43,33 @@ export default function EmployeeHome() {
         fetchAttendance();
     }, [user]);
 
-    console.log(attendance);
+    const clockIn = async () => {
+        try {
+            await api.post("/attendancemp");
+            // Refresh attendance data after clocking in
+            const response = await api.get(`/employee/${user?.employeeId}/attendance`);
+            setAttendance(response.data);
+        } catch (error) {
+            console.error("Error clocking in:", error);
+            toast.error("Error clocking in.");
+        }
+    }
+
+    const clockOut = async () => {
+        try {
+            await api.put("/attendancemp");
+            // Refresh attendance data after clocking out
+            const response = await api.get(`/employee/${user?.employeeId}/attendance`);
+            setAttendance(response.data);
+        } catch (error) {
+            console.error("Error clocking out:", error);
+        }
+    }
     
     return (
     <div className="p-6 space-y-6">
       <div className="flex flex-wrap gap-4 mb-6">
+        <Toaster />
         {/* generate cards to hold relevant summaries(like total employees, active projects, attendance etc) */}
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
@@ -133,40 +156,84 @@ export default function EmployeeHome() {
             <CardContent className="space-y-6">
               {/* Clock In/Out Buttons */}
               <div className="flex gap-3">
-                <Button className="flex-1" size="lg">
-                  <Play className="h-4 w-4 mr-2" />
-                  Clock In
-                </Button>
-                <Button variant="outline" className="flex-1" size="lg">
+                {attendance[0]?.timeOut === null ? (
+                  <Button className="flex-1 bg-blue-700" size="lg" onClick={clockIn} disabled>
+                    <Loader className="h-4 w-4 mr-2" />
+                    Currently Clocked In
+                  </Button>
+                ) : (
+                  <Button className="flex-1" size="lg" onClick={clockIn}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Clock In
+                  </Button>
+                )}
+                
+                <Button variant="outline" className="flex-1" size="lg" onClick={clockOut}>
                   <Square className="h-4 w-4 mr-2" />
                   Clock Out
                 </Button>
               </div>
 
               {/* Current Session */}
-              <div className="bg-muted/30 rounded-lg p-4">
+              {/* <div className="bg-muted/30 rounded-lg p-4">
                 <p className="text-sm text-muted-foreground mb-1">Current Session</p>
                 <p className="text-2xl font-bold">2h 15m</p>
                 <p className="text-xs text-muted-foreground mt-1">Started at 9:30 AM</p>
-              </div>
+              </div> */}
 
               {/* Recent Time Logs */}
               <div className="space-y-3">
                 <h4 className="text-sm font-medium text-muted-foreground">Recent Entries</h4>
                 <div className="space-y-2">
-                  {[
-                    { project: "Website Redesign", duration: "3h 30m", date: "Today" },
-                    { project: "Client Meeting", duration: "1h 15m", date: "Yesterday" },
-                    { project: "Bug Fixes", duration: "2h", date: "Yesterday" }
-                  ].map((log, i) => (
-                    <div key={i} className="flex justify-between items-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                      <div>
-                        <p className="font-medium text-sm">{log.project}</p>
-                        <p className="text-xs text-muted-foreground">{log.date}</p>
+                  {attendance.slice(0, 4).map((log: any, i) => {
+                    const date = new Date(log.workDate).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+                    const timeIn = log.timeIn ? new Date(log.timeIn).toLocaleDateString([], { hour: "2-digit", minute: "2-digit" }) : "--";
+                    const timeOut = log.timeOut ? new Date(log.timeOut).toLocaleDateString([], { hour: "2-digit", minute: "2-digit" }) : null;
+                    let calculatedHours = "--";
+                    if (log.timeIn && log.timeOut) {
+                      const diff = new Date(log.timeOut).getTime() - new Date(log.timeIn).getTime();
+                      const hours = Math.floor(diff / (1000 * 60 * 60));
+                      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                      calculatedHours = `${hours}h ${minutes}m`;
+                    } else if (log.timeIn && !log.timeOut) {
+                      const diff = new Date().getTime() - new Date(log.timeIn).getTime();
+                      const hours = Math.floor(diff / (1000 * 60 * 60));
+                      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                      calculatedHours = `${hours}h ${minutes}m`;
+                    }
+                    const isOngoing = !log.timeOut;
+
+                    return (
+                      <div
+                        key={i}
+                        className="flex justify-between items-center p-2 rounded-xl border hover:bg-muted/50 transition"
+                      >
+                        <div className="space-y-1">
+                          <p className="font-medium text-sm">{date}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {timeIn} – {timeOut || "Present"}
+                          </p>
+                        </div>
+                        <div>
+                          <span
+                            className={`text-xs px-2 py-1 rounded-full font-medium ${
+                              isOngoing
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {isOngoing ? "Ongoing" : "Completed"}
+                          </span>
+                          <p className="text-xs text-muted-foreground font-mono pr-2 pt-1 flex justify-end">
+                            {calculatedHours}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-sm font-mono">{log.duration}</p>
-                    </div>
-                  ))}
+                    )
+                  })}
+                  <p className="text-xs text-muted-foreground text-right cursor-pointer hover:underline">
+                    View all logs →
+                  </p>
                 </div>
               </div>
             </CardContent>

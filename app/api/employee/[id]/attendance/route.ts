@@ -13,7 +13,10 @@ export async function GET(req:Request,{params}:{params:{id:string}}){
         // find attendance records for the employee
         const attendanceRecords=await prisma.attendance.findMany({
             where:{employeeId},
-            orderBy:{workDate:"desc"}
+            orderBy:[
+                // {workDate:"desc"},
+                {timeIn:"desc"}
+            ]
         });
         return NextResponse.json(attendanceRecords);
     }catch(error){

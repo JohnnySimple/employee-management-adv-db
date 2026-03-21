@@ -61,7 +61,7 @@ export const config = {
     matcher: [
         "/api/protected/:path*",
         "/admin/:path*",
-        "/api/attendemp/:path*",
+        "/api/attendancemp/:path*",
         "/api/salaryemp/:path*",
     ],
 }
