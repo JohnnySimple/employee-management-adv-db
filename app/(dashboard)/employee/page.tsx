@@ -9,6 +9,41 @@ import { Badge, Clock } from "lucide-react";
 
 
 export default function EmployeeHome() {
+
+    const [attendance, setAttendance] = useState([]);
+    const [user, setUser] = useState(null);
+
+    // get logged in employee from token
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await api.get("/me");
+                setUser(response.data);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
+        if (!user) return;
+        // Fetch attendance data for the employee
+        const fetchAttendance = async () => {
+            try {
+                const response = await api.get(`/employee/${user?.employeeId}/attendance`); // Replace with actual employee ID
+                setAttendance(response.data);
+            } catch (error) {
+                console.error("Error fetching attendance data:", error);
+            }
+        };
+
+        fetchAttendance();
+    }, [user]);
+
+    console.log(attendance);
+    
     return (
     <div className="p-6 space-y-6">
       <div className="flex flex-wrap gap-4 mb-6">
