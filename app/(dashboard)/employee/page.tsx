@@ -5,7 +5,7 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { FolderOpen, Play, Plus, Square, Users } from "lucide-react";
 import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { Badge, Clock, Loader } from "lucide-react";
+import { Badge, Clock, Loader, CalendarCheck2, Umbrella, Briefcase, Activity } from "lucide-react";
 import { toast, Toaster } from "sonner";
 
 
@@ -81,13 +81,89 @@ export default function EmployeeHome() {
             setAttendance(response.data);
         } catch (error) {
             console.error("Error clocking out:", error);
+            toast.error("Error clocking out.");
         }
     }
     
     return (
     <div className="p-6 space-y-6">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-sm border border-blue-100/50">
+        {/* Decorative gradient blob */}
+        <div className="absolute -top-24 -right-24 h-48 w-48 rounded-full bg-gradient-to-br from-blue-200/30 to-transparent blur-2xl" />
+        <div className="absolute -bottom-24 -left-24 h-48 w-48 rounded-full bg-gradient-to-tr from-blue-200/20 to-transparent blur-2xl" />
+        
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 p-6 relative z-10">
+          {/* Left Section */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+              <p className="text-sm font-medium text-blue-600">
+                {new Date().toLocaleDateString(undefined, {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              </p>
+            </div>
+
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+              Welcome back, {user?.employee?.firstName} <span className="inline-block animate-wave">👋</span>
+            </h1>
+
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 w-fit">
+                <svg className="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold text-blue-700">{stats?.activeProjectCount}</span> active projects
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Section */}
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/80 backdrop-blur-sm border border-gray-200/80 shadow-sm hover:shadow-md transition-shadow">
+            {/* Time */}
+            <div className="px-2 py-1">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Current Time</p>
+              <p className="text-xl font-semibold font-mono text-gray-800">
+                {new Date().toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+
+            {/* Divider */}
+            <div className="h-10 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent" />
+
+            {/* Status */}
+            <div className="px-2 py-1">
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</p>
+              {attendance[0]?.timeOut === null ? (
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                  <p className="text-sm font-semibold text-green-600">Clocked In</p>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <div className="h-2 w-2 rounded-full bg-gray-400" />
+                  <p className="text-sm font-semibold text-gray-500">Clocked Out</p>
+                </div>
+              )}
+            </div>
+
+            {/* Optional Action */}
+            <button className="ml-1 px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm hover:shadow-md hover:from-blue-700 hover:to-blue-800 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+              View Logs
+            </button>
+          </div>
+        </div>
+      </div>
+      <Toaster />
       <div className="flex flex-wrap gap-4 mb-6">
-        <Toaster />
         {/* generate cards to hold relevant summaries(like total employees, active projects, attendance etc) */}
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
@@ -95,7 +171,7 @@ export default function EmployeeHome() {
               <CardTitle className="text-sm font-medium">
                 Attendance Rate
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">1</div>
@@ -112,7 +188,7 @@ export default function EmployeeHome() {
               <CardTitle className="text-sm font-medium">
                 Leave Balance
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <Umbrella className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">14 days</div>
@@ -129,7 +205,7 @@ export default function EmployeeHome() {
               <CardTitle className="text-sm font-medium">
                 Project Load
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <Briefcase className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.activeProjectCount ?? 0}</div>
@@ -144,9 +220,9 @@ export default function EmployeeHome() {
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
-                Item 4
+                Performance
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <Activity className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">0</div>
@@ -260,7 +336,7 @@ export default function EmployeeHome() {
 
         {/* Active Projects Card */}
         <div className="lg:w-80 xl:w-96">
-          <Card className=" border-0 shadow-sm">
+          <Card className="border-0 shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-xl font-semibold flex items-center gap-2">
                 <FolderOpen className="h-5 w-5 text-primary" />
