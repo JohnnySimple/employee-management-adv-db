@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import { ChartBar } from "lucide-react";
 import api from "@/lib/api";
+import SalaryHistoryTable from "@/components/employee/salary-history-table";
 
 export default function EmployeePayroll() {
 
@@ -40,9 +41,9 @@ export default function EmployeePayroll() {
                     </CardHeader>
                     <CardContent className="space-y-6">
                     {/* Clock In/Out Buttons */}
-                    <div className="flex gap-3">
-                        some
-                    </div>
+                    {/* <div className="flex gap-3"> */}
+                        <SalaryHistoryTable history={salaries} />
+                    {/* </div> */}
                     </CardContent>
                 </Card>
                 </div>
@@ -68,7 +69,7 @@ export default function EmployeePayroll() {
                         <CardContent>
                         <div className="flex justify-between">
                             <div>
-                                <div className="text-2xl font-bold">$ { salaries && salaries.length > 0 ? salaries[0].amount : 0.00 }</div>
+                                <div className="text-2xl font-bold">$ { salaries && salaries.length > 0 ? salaries[0].amount : "N/A" }</div>
                             </div>
                             <p>
                                 <span className="text-xs px-2 py-1 rounded-full font-medium bg-green-100 text-green-700">
@@ -79,7 +80,7 @@ export default function EmployeePayroll() {
                         </CardContent>
                     </Card>
 
-                    <Card className="flex-1">
+                    <Card className="flex-1 mt-6">
                         <CardHeader className="flex flex-row items-center justify-between">
                             <div className="flex">
                                 <ChartBar className="w-4 h-4 mr-2 text-muted-foreground"/>
@@ -87,25 +88,25 @@ export default function EmployeePayroll() {
                                     Upcoming payroll
                                 </CardTitle>
                             </div>
-                            <p>{ salaries && salaries.length > 0 ? new Date(salaries[0].salaryDate).toLocaleDateString(undefined,
+                            <p>{ new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toLocaleDateString(undefined,
                                 {
                                     year: "numeric",
                                     month: "long",
                                     day: "numeric"
                                 }
-                            ) : "n/a" }</p>
+                            )}</p>
                         </CardHeader>
                         <CardContent>
-                        <div className="flex justify-between">
-                            <div>
-                                <div className="text-2xl font-bold">$ { salaries && salaries.length > 0 ? salaries[0].amount : 0.00 }</div>
+                            <div className="flex justify-between">
+                                <div>
+                                    <div className="text-2xl font-bold">$ { salaries && salaries.length > 0 ? salaries[0].amount : "N/A" }</div>
+                                </div>
+                                <p>
+                                    <span className="text-xs px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">
+                                        PENDING
+                                    </span>
+                                </p>
                             </div>
-                            <p>
-                                <span className="text-xs px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">
-                                    PENDING
-                                </span>
-                            </p>
-                        </div>
                         </CardContent>
                     </Card>
                 </div>
