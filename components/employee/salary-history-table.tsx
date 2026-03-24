@@ -16,8 +16,6 @@ import { Proportions } from "lucide-react";
 
 export default function SalaryHistoryTable({ history }: { any }) {
 
-    console.log(history);
-
     return (
         <Card className="overflow-hidden p-6">
             <div className="overflow-x-auto">

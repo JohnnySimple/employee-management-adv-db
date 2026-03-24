@@ -7,6 +7,7 @@ import api from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge, Clock, Loader, CalendarCheck2, Umbrella, Briefcase, Activity } from "lucide-react";
 import { toast, Toaster } from "sonner";
+import Link from "next/link";
 
 
 export default function EmployeeHome() {
@@ -156,9 +157,12 @@ export default function EmployeeHome() {
             </div>
 
             {/* Optional Action */}
-            <button className="ml-1 px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm hover:shadow-md hover:from-blue-700 hover:to-blue-800 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-              View Logs
-            </button>
+            
+            <Link href="/employee/attendance">
+              <button className="ml-1 px-4 py-2 text-sm font-medium rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-sm hover:shadow-md hover:from-blue-700 hover:to-blue-800 transition-all duration-200 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                View Logs
+              </button>
+            </Link>
           </div>
         </div>
       </div>
@@ -326,7 +330,9 @@ export default function EmployeeHome() {
                     )
                   })}
                   <p className="text-xs text-muted-foreground text-right cursor-pointer hover:underline">
-                    View all logs →
+                    <Link href="/employee/attendance">
+                      View all logs →
+                    </Link>
                   </p>
                 </div>
               </div>

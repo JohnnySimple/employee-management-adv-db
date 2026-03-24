@@ -6,19 +6,25 @@ import { getCurrentUser } from "@/lib/auth";
 // Retrives the list of attendance records for the authenticated employee
 export async function GET(req:Request) {
     try{
-        let authHeader: string | null = null;
-        if (req) authHeader = req.headers.get("authorization");
-        const headerToken = authHeader?.startsWith("Bearer ")
-        ? authHeader.split(" ")[1]
-        : null;
+        // let authHeader: string | null = null;
+        // if (req) authHeader = req.headers.get("authorization");
+        // const headerToken = authHeader?.startsWith("Bearer ")
+        // ? authHeader.split(" ")[1]
+        // : null;
 
-        const token= headerToken;
+        // const token= headerToken;
 
-         const secret=new TextEncoder().encode(process.env.JWT_SECRET);
+        //  const secret=new TextEncoder().encode(process.env.JWT_SECRET);
 
-        const { payload } = await jwtVerify(token, secret)
+        // const { payload } = await jwtVerify(token, secret)
 
-        const employeeId = payload.employeeId as number;
+        // const employeeId = payload.employeeId as number;
+
+        const user = await getCurrentUser();
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        const employeeId = user.employeeId as number;
 
         // Get attendance records for the employee
         const attendanceRecords=await prisma.attendance.findMany({
