@@ -68,8 +68,8 @@ export default function EmployeeHome() {
             const response = await api.get(`/employee/${user?.employeeId}/attendance`);
             setAttendance(response.data);
         } catch (error) {
-            console.error("Error clocking in:", error);
-            toast.error("Error clocking in.");
+            // console.error("Error clocking in:", error?.response?.data?.message);
+            toast.error(`Error clocking in. ${error?.response?.data?.message}`);
         }
     }
 
@@ -80,8 +80,8 @@ export default function EmployeeHome() {
             const response = await api.get(`/employee/${user?.employeeId}/attendance`);
             setAttendance(response.data);
         } catch (error) {
-            console.error("Error clocking out:", error);
-            toast.error("Error clocking out.");
+            // console.error("Error clocking out:", error);
+            toast.error(`Error clocking out. ${error?.response?.data?.message}`);
         }
     }
     
