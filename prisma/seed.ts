@@ -236,7 +236,8 @@ async function main() {
             startDate: new Date("2026-03-10"),
             endDate: new Date("2026-03-20"),
             hoursOff: 8,
-            employeeLeaveId: empLeave.employeeLeaveId
+            employeeLeaveId: empLeave.employeeLeaveId,
+            status:"Approved"
         }
     })
 }
