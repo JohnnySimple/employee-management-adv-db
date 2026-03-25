@@ -24,6 +24,15 @@ export default function EmployeeAttendance() {
         fetchAttendance();
     }, [])
 
+    const formatTime = (minutes: number) => {
+        const roundedMinutes = Math.round(minutes);
+        const h24 = Math.floor(roundedMinutes / 60);
+        const m = roundedMinutes % 60;
+        const period = h24 >= 12 ? "PM" : "AM";
+        const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+        return `${h12}:${m.toString().padStart(2, "0")} ${period}`;
+    }
+
     const totalHours = attendance?.reduce((sum, a) => sum + (a.hoursWorked || 0) + (a.overtimeHours || 0), 0);
     const averageWorkingHours = attendance?.reduce((sum, a) => sum + (a.hoursWorked || 0), 0) / (attendance?.length || 1);
 
@@ -32,13 +41,16 @@ export default function EmployeeAttendance() {
         return date.getHours() * 60 + date.getMinutes();
     }
     const averageCheckInMinutes = attendance?.reduce((sum, a) => sum + getMinutes(a.timeIn), 0) / (attendance?.length || 1);
-    const averageCheckIn = `${Math.floor(averageCheckInMinutes / 60)
-        .toString().padStart(2, "0")}:${Math.floor(averageCheckInMinutes % 60).toString().padStart(2, "0")}`;
+    // const averageCheckIn = `${Math.floor(averageCheckInMinutes / 60)
+    //     .toString().padStart(2, "0")}:${Math.floor(averageCheckInMinutes % 60).toString().padStart(2, "0")}`;
+    const averageCheckIn = formatTime(averageCheckInMinutes);
 
     const validCheckouts = attendance?.filter(a => a.timeOut);
     const averageCheckOutMinutes = validCheckouts?.reduce((sum, a) => sum + getMinutes(a.timeOut), 0) / (attendance?.length || 1);
-    const averageCheckOut = `${Math.floor(averageCheckOutMinutes / 60)
-        .toString().padStart(2, "0")}:${Math.floor(averageCheckOutMinutes % 60).toString().padStart(2, "0")}`;
+    // const averageCheckOut = `${Math.floor(averageCheckOutMinutes / 60)
+    //     .toString().padStart(2, "0")}:${Math.floor(averageCheckOutMinutes % 60).toString().padStart(2, "0")}`;
+    const averageCheckOut = formatTime(averageCheckOutMinutes);
+
     
 
     return (
