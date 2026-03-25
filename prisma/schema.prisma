@@ -119,6 +119,7 @@ model LeaveDate {
   hoursOff        Float
   employeeLeaveId Int
   employeeLeave   EmployeeLeave @relation(fields: [employeeLeaveId], references: [employeeLeaveId])
+  status          String        @default("Pending")
 }
 
 enum Role {
