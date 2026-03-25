@@ -12,7 +12,7 @@ import {
     SidebarMenuItem,
     SidebarMenuButton
 } from "@/components/ui/sidebar";
-import { Building2, Clock, DollarSign, FileText, LayoutDashboard, LogOut, Settings, Shield, Users, User } from "lucide-react";
+import { Building2, Clock, DollarSign, FileText, LayoutDashboard, LogOut, Settings, TreePalm, Shield, Users, User } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -61,6 +61,14 @@ export function EmployeeSidebar() {
                                 <Link href="/employee/payroll">
                                     <DollarSign className="mr-2 h-4 w-4" />
                                     Payroll
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                            <SidebarMenuButton asChild>
+                                <Link href="/employee/leave">
+                                    <TreePalm className="mr-2 h-4 w-4" />
+                                    Leave
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
