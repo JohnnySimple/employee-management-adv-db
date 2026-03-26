@@ -1,46 +1,74 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { jwtVerify } from "jose";
+import { getCurrentUser } from "@/lib/auth";
 
 // Retrieves all leave records for an authenticated employee
 export async function GET(req:Request){
     try{
-        let authHeader=req.headers.get("Authorization");
-        const headerToken= authHeader?.startsWith("Bearer") ? 
-        authHeader.split(" ")[1] : null;
+        // let authHeader=req.headers.get("Authorization");
+        // const headerToken= authHeader?.startsWith("Bearer") ? 
+        // authHeader.split(" ")[1] : null;
 
-        const token= headerToken;
-        if(!token){
-            return NextResponse.json({error:{message:"Authorization token missing"}} , {status:401});
+        // const token= headerToken;
+        // if(!token){
+        //     return NextResponse.json({error:{message:"Authorization token missing"}} , {status:401});
+        // }
+
+        // const secret=new TextEncoder().encode(process.env.JWT_SECRET);
+
+        // const {payload}=await jwtVerify(token,secret);
+        // console.log("JWT Payload:", payload);
+        // const employeeId=payload.employeeId as number;
+
+        const user = await getCurrentUser();
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
-
-        const secret=new TextEncoder().encode(process.env.JWT_SECRET);
-
-        const {payload}=await jwtVerify(token,secret);
-        console.log("JWT Payload:", payload);
-        const employeeId=payload.employeeId as number;
+        const employeeId = user.employeeId as number;
 
         // Fetch Leave records after authorization
         const leaveRecords=await prisma.employeeLeave.findMany({
             where:{employeeId},
             include:{
-                leave:true,
+                leave: true,
+                leaveDates: {
+                    select: {
+                        startDate: true,
+                        endDate: true,
+                        hoursOff: true,
+                        status: true
+                    }
+                }
             }
         });
 
         // Format response to include leave details
-        const formattedRecords=leaveRecords.map(record=>({
-            employeeId: record.employeeId,
-            leaveId: record.leaveId,
-            status: record.status,
-            leaveType: record.leave.leaveType,
-            totalRemaining:record.totalRemaining,
-            totalLeaveHours:record.totalLeaveHours
-        }));
-        if(!formattedRecords){
+        // const formattedRecords=leaveRecords.map(record=>({
+        //     employeeId: record.employeeId,
+        //     leaveId: record.leaveId,
+        //     status: record.status,
+        //     leaveType: record.leave.leaveType,
+        //     totalRemaining:record.totalRemaining,
+        //     totalLeaveHours:record.totalLeaveHours,
+        // }));
+
+        const flatttened = leaveRecords.flatMap((el) => 
+            el.leaveDates.map(ld => ({
+                employeeLeaveId: el.employeeLeaveId,
+                leaveType: el.leave.leaveType,
+                status: el.status,
+                startDate: ld.startDate,
+                endDate: ld.endDate,
+                hoursOff: ld.hoursOff,
+                dateStatus: ld.status
+            }))
+        )
+
+        if(!flatttened){
             return NextResponse.json({error:{message:`No leave records found for employee ID ${employeeId}`}} , {status:404});
         }
-        return NextResponse.json(formattedRecords);
+        return NextResponse.json(flatttened);
     }catch(error){
         console.log("Error fetching leave records:", error);
         return NextResponse.json({error:{message:"Unable to fetch leave records"}} , {status:500});
@@ -50,19 +78,21 @@ export async function GET(req:Request){
 // Allows an authenticated employee to apply for leave requests
 export async function POST(req:Request){
     try{
-        let authHeader=req.headers.get("Authorization");
-        const headerToken=authHeader?.startsWith("Bearer")?
-        authHeader.split(" ")[1] : null;    
 
-        const token=headerToken;
-        if(!token){
-            return NextResponse.json({error:{message:"Authorization token missing"}} , {status:401});   
+        const user = await getCurrentUser();
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+        const employeeId = user.employeeId as number;
 
-        const{payload}=await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));
-        const employeeId=payload.employeeId as number;
+        const { LeaveId, startDate, endDate }=await req.json();
 
-        const {LeaveId}=await req.json();
+        if (!LeaveId) {
+            return NextResponse.json(
+                { error: { message: "LeaveId is expected" } },
+                { status: 400 }
+            )
+        }
 
         // Check if Employee has any leave requests with pending status
         const employeeLeave= await prisma.employeeLeave.findFirst({
@@ -76,8 +106,8 @@ export async function POST(req:Request){
             return NextResponse.json({error:{message:"You have a pending leave request. Please wait for it to be processed before applying for another leave."}} , {status:400});
         }
 
-        const start=new Date();
-        const end=new Date();
+        const start=new Date(startDate);
+        const end=new Date(endDate);
 
         // Validate the date objects to date type
         if(isNaN(start.getTime()) || isNaN(end.getTime())){
