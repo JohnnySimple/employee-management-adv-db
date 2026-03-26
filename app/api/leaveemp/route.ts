@@ -78,19 +78,21 @@ export async function GET(req:Request){
 // Allows an authenticated employee to apply for leave requests
 export async function POST(req:Request){
     try{
-        let authHeader=req.headers.get("Authorization");
-        const headerToken=authHeader?.startsWith("Bearer")?
-        authHeader.split(" ")[1] : null;    
 
-        const token=headerToken;
-        if(!token){
-            return NextResponse.json({error:{message:"Authorization token missing"}} , {status:401});   
+        const user = await getCurrentUser();
+        if (!user) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+        const employeeId = user.employeeId as number;
 
-        const{payload}=await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));
-        const employeeId=payload.employeeId as number;
+        const { LeaveId, startDate, endDate }=await req.json();
 
-        const {LeaveId}=await req.json();
+        if (!LeaveId) {
+            return NextResponse.json(
+                { error: { message: "LeaveId is expected" } },
+                { status: 400 }
+            )
+        }
 
         // Check if Employee has any leave requests with pending status
         const employeeLeave= await prisma.employeeLeave.findFirst({
@@ -104,8 +106,8 @@ export async function POST(req:Request){
             return NextResponse.json({error:{message:"You have a pending leave request. Please wait for it to be processed before applying for another leave."}} , {status:400});
         }
 
-        const start=new Date();
-        const end=new Date();
+        const start=new Date(startDate);
+        const end=new Date(endDate);
 
         // Validate the date objects to date type
         if(isNaN(start.getTime()) || isNaN(end.getTime())){
