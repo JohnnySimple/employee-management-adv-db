@@ -6,10 +6,14 @@ import { ChartBar, Pill } from "lucide-react";
 import api from "@/lib/api";
 import { TreePalm } from "lucide-react";
 import LeaveHistoryTable from "@/components/employee/leave-history-table";
+import { Button } from "@/components/ui/button";
+import ApplyForLeaveModal from "@/components/employee/apply-for-leave-modal";
 
 export default function EmployeeLeave() {
 
     const [leaveHistory, setLeaveHistory] = useState(null);
+    const [leaveTypes, setLeaveTypes] = useState(null);
+    const [openApplyForLeaveModal, setOpenApplyForLeaveModal] = useState(false);
 
     useEffect(() => {
         const fetchLeaveHistory = async () => {
@@ -24,10 +28,30 @@ export default function EmployeeLeave() {
         fetchLeaveHistory();
     }, [])
 
+    useEffect(() => {
+        const fetchLeaveTypes = async () => {
+            try {
+                const response = await api.get("/leaveType");
+                setLeaveTypes(response.data.leaveTypes);
+            } catch (error) {
+                console.error("Error fetching job titles:", error);
+            }
+        }
+
+        fetchLeaveTypes();
+    }, [])
+
 
     return (
         <div className="p-6 space-y-6">
-            <h3>Leave Balance</h3>
+            <div className="flex justify-between">
+                <h3>Leave Balance</h3>
+                <div className="flex justify-end">
+                    <Button variant="outline" size="sm" className="mb-4" onClick={() => setOpenApplyForLeaveModal(true)}>
+                        Apply for Leave
+                    </Button>
+                </div>
+            </div>
             <div className="flex flex-wrap gap-4 mb-6">
                 <div className="w-full sm:w-[48%] lg:w-[23%]">
                     <Card className="flex-1 rounded-sm">
@@ -80,6 +104,8 @@ export default function EmployeeLeave() {
                     </Card>
                 </div>
             </div>
+
+            <ApplyForLeaveModal open={openApplyForLeaveModal} setOpen={setOpenApplyForLeaveModal} leaveTypes={leaveTypes} />
         </div>
     )
 }
