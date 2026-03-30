@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { jwtVerify } from "jose";
 import { getCurrentUser } from "@/lib/auth";
+import { get } from "http";
 
 // Retrieves all leave records for an authenticated employee
 export async function GET(req:Request){
@@ -125,7 +126,7 @@ export async function POST(req:Request){
 
         // Check balance without deduction
         if(employeeLeave.totalRemaining <hoursOff){
-            return NextResponse.json({error:{message:"You have sufficient leave balance. No need to submit leave request."}} , {status:400});
+            return NextResponse.json({error:{message:"Insufficient Leave Balance. Submit Leave Request."}} , {status:400});
         }
 
         // Prevent Overlapping leave requests
@@ -161,17 +162,23 @@ export async function POST(req:Request){
 //  Update leave request status by employee
 export async function PUT(req:Request){
     try{
-        let authHeader=req.headers.get("Authorization");
-        const headerToken=authHeader?.startsWith("Bearer") ?
-        authHeader.split(" ")[1] : null;
-
-        const token=headerToken;
-        if(!token){
-            return NextResponse.json({error:{message:"Authorization token missing"}} , {status:401});
+        // Using GetCurrentUser to retrieve user info from JWT in cookies for authentication
+        const user=await getCurrentUser();
+        if(!user){
+            return NextResponse.json({error:"Unauthorized"}, {status:401}); 
         }
+        const employeeId=user.employeeId as number;
+        // let authHeader=req.headers.get("Authorization");
+        // const headerToken=authHeader?.startsWith("Bearer") ?
+        // authHeader.split(" ")[1] : null;
 
-        const {payload}=await jwtVerify(token,new TextEncoder().encode(process.env.JWT_SECRET!))
-        const employeeId=payload.employeeId as number;
+        // const token=headerToken;
+        // if(!token){
+        //     return NextResponse.json({error:{message:"Authorization token missing"}} , {status:401});
+        // }
+
+        // const {payload}=await jwtVerify(token,new TextEncoder().encode(process.env.JWT_SECRET!))
+        // const employeeId=payload.employeeId as number;
 
         const {leaveDateId}=await req.json();
 
@@ -214,7 +221,7 @@ export async function PUT(req:Request){
         // adjust remaining balance by adding back old hours and checking ig new hours exceed balance
         const adjustedBalance=balance.totalRemaining + oldHoursOff - newHoursOff;
 
-        if(adjustedBalance <0){
+        if(adjustedBalance < 0){
             return NextResponse.json({error:{message:"Insufficient Leave balance "}} , {status:400});
         }
         // Update balance 
