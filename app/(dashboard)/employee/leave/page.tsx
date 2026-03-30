@@ -8,6 +8,7 @@ import { TreePalm } from "lucide-react";
 import LeaveHistoryTable from "@/components/employee/leave-history-table";
 import { Button } from "@/components/ui/button";
 import ApplyForLeaveModal from "@/components/employee/apply-for-leave-modal";
+import { Toaster } from "sonner";
 
 export default function EmployeeLeave() {
 
@@ -44,6 +45,7 @@ export default function EmployeeLeave() {
 
     return (
         <div className="p-6 space-y-6">
+            <Toaster />
             <div className="flex justify-between">
                 <h3>Leave Balance</h3>
                 <div className="flex justify-end">

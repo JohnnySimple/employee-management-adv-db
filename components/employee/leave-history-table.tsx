@@ -57,7 +57,17 @@ export default function LeaveHistoryTable({ history }: { any }) {
                                         day: "numeric"
                                     }
                                 )}</TableCell>
-                                <TableCell className="text-sm font-medium">{ leave.status }</TableCell>
+                                <TableCell>
+                                    { leave.dateStatus === "Approved" ? (
+                                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-green-100 text-green-700">
+                                            { leave.dateStatus }
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">
+                                            { leave.dateStatus }
+                                        </span>
+                                    ) }
+                                </TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
                                     Action
                                 </TableCell>

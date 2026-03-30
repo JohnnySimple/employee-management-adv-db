@@ -46,7 +46,21 @@ export default function ApplyForLeaveModal({ open, setOpen, leaveTypes }) {
         });
 
     const applyForLeave = async (data: FormData) => {
-        console.log(data);
+        try {
+            const applyResponse =await api.post("/leaveemp", data);
+            setIsApplyForLeaveModalOpen(false);
+            
+            if (applyResponse.status === 201) {
+                reset();
+                toast.success("Leave requested successfully!");
+            } else {
+                toast.error("Failed submitting leave request.");
+            }
+            
+        } catch (error) {
+            console.error("Error applying for leave:", error);
+            toast.error("Failed to apply for leave.");
+        }
     }
 
     return (
@@ -66,7 +80,7 @@ export default function ApplyForLeaveModal({ open, setOpen, leaveTypes }) {
                                 <Label htmlFor="startDate">Start Date</Label>
                                 <Input
                                     id="startDate"
-                                    type="date"
+                                    type="datetime-local"
                                     {...register("startDate")}
                                 />
                                 {errors.startDate && (
@@ -77,7 +91,7 @@ export default function ApplyForLeaveModal({ open, setOpen, leaveTypes }) {
                                 <Label htmlFor="endDate">End Date</Label>
                                 <Input
                                     id="endDate"
-                                    type="date"
+                                    type="datetime-local"
                                     {...register("endDate")}
                                 />
                                 {errors.endDate && (

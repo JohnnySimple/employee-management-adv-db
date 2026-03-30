@@ -85,9 +85,9 @@ export async function POST(req:Request){
         }
         const employeeId = user.employeeId as number;
 
-        const { LeaveId, startDate, endDate }=await req.json();
+        const { leaveId, startDate, endDate }=await req.json();
 
-        if (!LeaveId) {
+        if (!leaveId) {
             return NextResponse.json(
                 { error: { message: "LeaveId is expected" } },
                 { status: 400 }
@@ -98,7 +98,7 @@ export async function POST(req:Request){
         const employeeLeave= await prisma.employeeLeave.findFirst({
             where:{
                 employeeId,
-                leaveId:LeaveId,
+                leaveId:leaveId,
             }
         });
         console.log("Employee Leave Check:", employeeLeave);
@@ -124,9 +124,9 @@ export async function POST(req:Request){
         const hoursOff=days*8;
 
         // Check balance without deduction
-        if(employeeLeave.totalRemaining <hoursOff){
-            return NextResponse.json({error:{message:"You have sufficient leave balance. No need to submit leave request."}} , {status:400});
-        }
+        // if(employeeLeave.totalRemaining <hoursOff){
+        //     return NextResponse.json({error:{message:"You have sufficient leave balance. No need to submit leave request."}} , {status:400});
+        // }
 
         // Prevent Overlapping leave requests
         const overlappingLeave=await prisma.leaveDate.findFirst({
