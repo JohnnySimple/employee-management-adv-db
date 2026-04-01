@@ -150,44 +150,40 @@ export default function adminAttendancePage() {
                 </Card>
 
                 {/* Charts */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                    {/* Line chart */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="tracking-widest font-bold">Hours Trend</CardTitle>
-                        </CardHeader>
-                        <CardContent className="h-100">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={hoursData}>
-                                    <XAxis dataKey="day" />
-                                    <YAxis />
-                                    <ReTooltip />
-                                    <Line type="monotone" dataKey="hours" strokeWidth={2} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-
-                    
-                    {/* Pie Chart */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="tracking-widest font-bold">Attendance Distribution</CardTitle>
-                        </CardHeader>
-                        <CardContent className="h-100">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={statusData} dataKey="value" nameKey="name" label>
-                                        {statusData.map((_, i) => (
-                                            <Cell key={i} />
-                                        ))}
-                                    </Pie>
-                                    <ReTooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
-                </div>
+                {/* Line chart */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="tracking-widest font-bold">Hours Trend</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-100">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={hoursData}>
+                                <XAxis dataKey="day" />
+                                <YAxis />
+                                <ReTooltip />
+                                <Line type="monotone" dataKey="hours" strokeWidth={2} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+                {/* Pie Chart */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="tracking-widest font-bold">Attendance Distribution</CardTitle>
+                    </CardHeader>
+                    <CardContent className="h-100">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie data={statusData} dataKey="value" nameKey="name" label>
+                                    {statusData.map((_, i) => (
+                                        <Cell key={i} />
+                                    ))}
+                                </Pie>
+                                <ReTooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
 
                 {/* Bar Chart */}
                 <Card>
