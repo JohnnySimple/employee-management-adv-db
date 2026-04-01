@@ -55,61 +55,61 @@ export default function AdminHome() {
               <CardTitle className="text-sm font-medium">
                 Total Employees
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{ stats?.employeesCount?.total }</div>
+              <div className="text-2xl font-bold">{stats?.employeesCount?.total}</div>
               <p className="text-xs text-muted-foreground">
-                { stats?.employeesCount?.active } Active, { stats?.employeesCount?.inactive } Inactive
+                {stats?.employeesCount?.active} Active, {stats?.employeesCount?.inactive} Inactive
               </p>
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
                 Projects
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{ stats?.projects.length }</div>
+              <div className="text-2xl font-bold">{stats?.projects.length}</div>
               <p className="text-xs text-muted-foreground">
-                { stats?.projectCount.inactive } Inactive
+                {stats?.projectCount.inactive} Inactive
               </p>
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
                 Departments
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{ stats?.departmentCount }</div>
+              <div className="text-2xl font-bold">{stats?.departmentCount}</div>
               <p className="text-xs text-muted-foreground">
                 All Inclusive
               </p>
             </CardContent>
           </Card>
         </div>
-        
+
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
                 Clocked In Today
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground"/>
+              <Users className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{ stats?.checkedInEmployeeCount }</div>
+              <div className="text-2xl font-bold">{stats?.checkedInEmployeeCount}</div>
               <p className="text-xs text-muted-foreground">
                 Live Attendance
               </p>
