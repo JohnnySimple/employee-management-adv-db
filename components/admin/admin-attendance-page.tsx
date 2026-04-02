@@ -23,59 +23,99 @@ import { Toaster } from "@/components/ui/sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Clock, Play, UserCheck, AlertCircle, Edit2, ClockAlert } from "lucide-react";
+import { Clock, Play, UserCheck, AlertCircle, Edit2, ClockAlert, Loader } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
     DropdownMenuContent,
     DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-export default function adminAttendancePage() {
+import { getAttendanceRecords } from "./attendancerecords/getAttendanceRecords";
+import { toast } from "sonner";
+
+// Design an Interface which matches the attendance record structure\
+interface AttendanceRecord {
+    leaveDate: string,
+    employeeName: string,
+    employeeId: string,
+    leaveType: string,
+    startDate: string,
+    endDate: string,
+    hoursOff: number,
+    status: string;
+}
+
+
+export default function AdminAttendancePage() {
     const [search, setSearch] = useState("");
+    const [leaveData, setLeaveData] = useState<AttendanceRecord[]>([]); //pass the attendance interface as a generic
+    const [loading, setLoading] = useState(false);
 
-    const attendanceData = [
-        { id: 1, employee: "John Doe", date: "March 24, 2026", checkIn: "10:48 AM", checkOut: "06:48 PM", ot: 2, status: "Present" },
-        { id: 2, employee: "Jane Smith", date: "March 24, 2026", checkIn: "11:05 AM", checkOut: "05:27 PM", ot: 0, status: "Late" },
-    ];
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                setLoading(true);
+                const data = await getAttendanceRecords();
+                setLeaveData(data);
+            } catch (error) {
+                console.log("Error Fetching Attendance Records:", error);
+                toast.error("Failed to load attendance records")
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    },[]);
 
-    const presentCount = attendanceData.filter(
-        (r) => r.status === "Present"
-    ).length;
+    const approvedCount = leaveData.filter((r) => r.status === "Approved").length;
+    const pendingCount = leaveData.filter((r) => r.status === "Pending").length;
+    const rejectedCount = leaveData.filter((r) => r.status === "Rejected").length;
 
-    const lateCount = attendanceData.filter(
-        (r) => r.status === "Late"
-    ).length;
-
-    const totalOT = attendanceData.reduce((sum, r) => sum + r.ot, 0);
+    const totalHoursOff = leaveData.reduce(
+        (sum, r) => sum + (r.hoursOff || 0),
+        0
+    );
 
 
     const statusData = [
-        { name: "Present", value: presentCount },
-        { name: "Late", value: lateCount },
+        { name: "Approved", value: approvedCount },
+        { name: "Pending", value: pendingCount },
+        { name: "Rejected", value: rejectedCount },
     ];
 
-    const hoursData = attendanceData.map((row, index) => ({
-        day: `Day ${index + 1}`,
-        hours: 8 + row.ot,
+    const hoursData = leaveData.map((row, index) => ({
+        day: `Leave ${index + 1}`,
+        hours: row.hoursOff || 0,
     }));
 
     const otData = [
-        { name: "OT Hours", value: totalOT },
-        { name: "Regular Hours", value: attendanceData.length * 8 },
+        { name: "Hours Off", value: totalHoursOff },
+        { name: "Working Hours (Est)", value: leaveData.length * 8 },
     ];
 
-    const filteredData = attendanceData.filter((row) =>
-        row.employee.toLowerCase().includes(search.toLowerCase())
+
+    const filteredData = leaveData.filter((row) =>
+        (row.employeeName ?? "").toLowerCase().includes(search.toLowerCase())
     );
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center ">
+                <Loader className="w-12 h-12 animate-spin text-gray-500">
+                    Fetching Data...
+                </Loader>
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-6 p-6">
             <Toaster />
             <h1 className="font-bold tracking-wide text-2xl">Attendance</h1>
             {/* Metrics Cards */}
-            <div className="grid grid-cols-3 md:grid-col-4 lg-grid-cols-6 gap-4">
+            <div className="grid grid-cols-3 md:grid-col-4 lg-grid-cols-6 gap-6">
                 {/* Total Hours Card */}
                 <Card>
                     <CardHeader>
@@ -84,7 +124,7 @@ export default function adminAttendancePage() {
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <Clock className="w-6 h-6 text-purple-400" />
-                            <span className="text-2xl font-bold">{attendanceData.length * 8 + totalOT} hrs</span>
+                            <span className="text-2xl font-bold">{totalHoursOff} hrs</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -115,12 +155,24 @@ export default function adminAttendancePage() {
                 {/* Employees Present Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="Tracking-widest font-bold">Employees Present</CardTitle>
+                        <CardTitle className="Tracking-widest font-bold">Approved Count</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <UserCheck className="w-6 h-6 text-yellow-500" />
-                            <span className="tracking-wide text-xl font-bold">{presentCount}</span>
+                            <span className="tracking-wide text-xl font-bold">{approvedCount}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="Tracking-widest font-bold">Pending Leave Requests</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-2">
+                            <AlertCircle className="w-6 h-6 text-yellow-500" />
+                            <span className="tracking-wide text-xl font-bold">{pendingCount}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -133,18 +185,6 @@ export default function adminAttendancePage() {
                         <div className="flex items-center gap-2">
                             <ClockAlert className="w-6 h-6 text-red-500" />
                             <span className="tracking-wide text-xl font-bold">{otData.length}</span>
-                        </div>
-                    </CardContent>
-                </Card>
-                {/* Late employees Arrival Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="Tracking-widest font-bold">Late Employees</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center gap-2">
-                            <AlertCircle className="w-6 h-6 text-orange-500" />
-                            <span className="tracking-wide text-xl font-bold">{lateCount}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -213,31 +253,31 @@ export default function adminAttendancePage() {
                     <TableHeader>
                         <TableRow>
                             <TableHead>Employee</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Check In</TableHead>
-                            <TableHead>Check Out</TableHead>
-                            <TableHead>OT Hours</TableHead>
+                            <TableHead>LeaveType</TableHead>
+                            <TableHead>Start Date</TableHead>
+                            <TableHead>EndDate</TableHead>
+                            <TableHead>Hours Off</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Action</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {filteredData.map((row) => (
-                            <TableRow key={row.id}>
-                                <TableCell>{row.employee}</TableCell>
-                                <TableCell>{row.date}</TableCell>
-                                <TableCell>{row.checkIn}</TableCell>
-                                <TableCell>{row.checkOut}</TableCell>
-                                <TableCell>{row.ot}</TableCell>
+                            <TableRow key={row.leaveDate}>
+                                <TableCell>{row.employeeName}</TableCell>
+                                <TableCell>{row.leaveType}</TableCell>
+                                <TableCell>{new Date(row.startDate).toLocaleDateString()}</TableCell>
+                                <TableCell>{new Date(row.endDate).toLocaleDateString()}</TableCell>
+                                <TableCell>{row.hoursOff}</TableCell>
                                 <TableCell>
                                     <Tooltip>
                                         <TooltipTrigger>
-                                            <span className={row.status === "Late" ? "text-red-500 border rounded-xl" : "text-green-500"}>
+                                            <span className={row.status === "Approved" ? "text-green-500 border rounded-xl" : row.status === "Pending" ? "text-yellow-500 border rounded-xl" : row.status === "Rejected" ? "text-red-500 border rounded-xl" : ""}>
                                                 {row.status}
                                             </span>
                                         </TooltipTrigger>
                                         <TooltipContent>
-                                            <p>{row.status === "Late" ? "Employee Checked-in late" : "Employee On time"}</p>
+                                            <p>{row.leaveType}</p>
                                         </TooltipContent>
                                     </Tooltip>
                                 </TableCell>
@@ -251,9 +291,8 @@ export default function adminAttendancePage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem>Edit Attendance</DropdownMenuItem>
-                                            <DropdownMenuItem>Mark OT</DropdownMenuItem>
-                                            <DropdownMenuItem>Change Status</DropdownMenuItem>
+                                            <DropdownMenuItem>{row.status==="Approved"? "":"Approve Request"}</DropdownMenuItem>
+                                            <DropdownMenuItem>Reject Request</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
