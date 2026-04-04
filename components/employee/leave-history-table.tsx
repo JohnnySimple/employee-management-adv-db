@@ -18,7 +18,7 @@ export default function LeaveHistoryTable({ history }: { any }) {
 
     return (
         <Card className="overflow-hidden p-6">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[400px]">
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>
@@ -62,8 +62,12 @@ export default function LeaveHistoryTable({ history }: { any }) {
                                         <span className="text-xs px-2 py-1 rounded-full font-medium bg-green-100 text-green-700">
                                             { leave.dateStatus }
                                         </span>
+                                    ) : leave.dateStatus === "Rejected" ? (
+                                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-red-100 text-red-700">
+                                            { leave.dateStatus }
+                                        </span>
                                     ) : (
-                                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">
+                                        <span className="text-xs px-2 py-1 rounded-full font-medium bg-blue-100 text-blue-700">
                                             { leave.dateStatus }
                                         </span>
                                     ) }

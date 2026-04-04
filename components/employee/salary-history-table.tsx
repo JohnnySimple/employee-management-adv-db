@@ -16,6 +16,9 @@ import { Proportions } from "lucide-react";
 
 export default function SalaryHistoryTable({ history }: { any }) {
 
+    const fmt = (n: number) =>
+        new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+
     return (
         <Card className="overflow-hidden p-6">
             <div className="overflow-x-auto">
@@ -47,7 +50,7 @@ export default function SalaryHistoryTable({ history }: { any }) {
                                         day: "numeric"
                                     }
                                 )}</TableCell>
-                                <TableCell className="">{pay.amount}</TableCell>
+                                <TableCell className="">{ fmt(pay.amount) }</TableCell>
                                 <TableCell className="text-sm text-muted-foreground">
                                     <Button variant="outline" size="sm" className="">
                                         <Proportions />
