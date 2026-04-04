@@ -102,7 +102,7 @@ export default function AdminAttendancePage() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center ">
+            <div className="flex items-center justify-center">
                 <Loader className="w-12 h-12 animate-spin text-gray-500">
                     Fetching Data...
                 </Loader>
