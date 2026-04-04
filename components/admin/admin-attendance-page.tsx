@@ -34,17 +34,17 @@ import { useState, useEffect } from "react";
 
 import { getAttendanceRecords } from "./attendancerecords/getAttendanceRecords";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 // Design an Interface which matches the attendance record structure\
 interface AttendanceRecord {
-    leaveDate: string,
+    leaveDate: number,
     employeeName: string,
     employeeId: string,
     leaveType: string,
     startDate: string,
     endDate: string,
     hoursOff: number,
-    status: string,
     leaveDateStatus: string;
 }
 
@@ -62,6 +62,48 @@ export default function AdminAttendancePage() {
     const [leaveData, setLeaveData] = useState<AttendanceRecord[]>([]); //pass the attendance interface as a generic
     const [loading, setLoading] = useState(false);
 
+    const [updatingId, setUpdatingId] = useState<number | null>(null);
+
+async function updateStatus(leaveDate: number, status: string) {
+    try {
+        setUpdatingId(leaveDate);
+
+        // Send PATCH request with correct field names
+        const payload = {
+            leaveDateId: Number(leaveDate), // backend still expects leaveDateId
+            status,
+        };
+
+        console.log("Sending PATCH request with payload:", payload);
+
+        const res = await api.patch("/leave", payload);
+
+        toast.success(`Request ${status}`);
+
+        // Update frontend state to match interface
+        setLeaveData((prev) =>
+            prev.map((r) =>
+                r.leaveDate === leaveDate
+                    ? { ...r, leaveDateStatus: status } // match interface property
+                    : r
+            )
+        );
+
+    } catch (error: any) {
+        console.error("Axios error:", error);
+
+        const message =
+            error?.response?.data?.error ||
+            error?.message ||
+            "Failed to update status";
+
+        toast.error(message);
+    } finally {
+        setUpdatingId(null);
+    }
+}
+
+// Load attendance records on component mount
     useEffect(() => {
         async function fetchData() {
             try {
@@ -113,7 +155,6 @@ export default function AdminAttendancePage() {
         return (
             <div className="flex items-center justify-center ">
                 <Loader className="w-12 h-12 animate-spin text-gray-500">
-                    Fetching Data...
                 </Loader>
             </div>
         )
@@ -345,8 +386,8 @@ export default function AdminAttendancePage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem>{row.leaveDateStatus === "Approved" ? "" : "Approve Request"}</DropdownMenuItem>
-                                            <DropdownMenuItem>Reject Request</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={()=>updateStatus(row.leaveDate,"Approved")}>{row.leaveDateStatus === "Approved" ? "" : "Approve Request"}</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={()=>updateStatus(row.leaveDate,"Rejected")}>Reject Request</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>

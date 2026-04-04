@@ -24,7 +24,6 @@ export async function GET(){
             startDate:lr.startDate,
             endDate:lr.endDate,
             hoursOff:lr.hoursOff,
-            status:lr.employeeLeave.status,
             leaveDateStatus: lr.status
         }));
 
@@ -104,4 +103,30 @@ export async function POST(req:Request){
     }
 }
 
-// Updates to the status of a leave data entry(eg: marking it as approved or rejected)
+// Updates to the status of a leavedata table status entry(eg: marking it as approved or rejected)
+export async function PATCH(req:Request){
+    try{
+        const data=await req.json();
+        const {leaveDateId,status} = data;
+        console.log("Received data:", data);
+        // Validate if the fields is present
+        if(leaveDateId==null || !status){
+            return NextResponse.json({error:"Required fields: LeaveDateId and status missing"},{status:400});
+        }
+
+        //Update the status of the leave Date entry
+        const updatedLeaveDate=await prisma.leaveDate.update({
+            where:{leaveDateId:Number(leaveDateId)},
+            data:{
+                status:status
+            }
+        });
+        return NextResponse.json({message:"Leave Date status updated Successfully",updatedLeaveDate:{
+            ...updatedLeaveDate,
+            leaveDateStatus:updatedLeaveDate.status,
+        }});
+    }catch(error){
+        console.log(error);
+        return NextResponse.json({error:"Failed to update leave date status"}, {status:500});
+    }
+}
