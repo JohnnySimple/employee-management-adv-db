@@ -9,6 +9,7 @@ import SalaryHistoryTable from "@/components/employee/salary-history-table";
 export default function EmployeePayroll() {
 
     const [salaries, setSalaries] = useState(null);
+    const [attendance, setAttendance] = useState(null);
 
     useEffect(() => {
         const fetchSalaries = async () => {
@@ -22,7 +23,38 @@ export default function EmployeePayroll() {
 
         fetchSalaries();
     }, [])
+
+    useEffect(() => {
+        const fetchAttendance = async () => {
+            try {
+                const response = await api.get("/attendancemp");
+                setAttendance(response.data);
+            } catch (error) {
+                console.error("Error fetching user attendance:", error);
+            }
+        };
+
+        fetchAttendance();
+    }, [])
+
+    const fmt = (n: number) =>
+        new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
+
+    // get last salary payment date
+    const lastPaidDate = salaries && salaries.length > 0 ? new Date(salaries[0].salaryDate) : null;
+
+    // get hours worked since last salary payment date
+    // const outstandingHours = attendance?.reduce((sum, a) => sum + (a.hoursWorked || 0) + (a.overtimeHours || 0), 0);
+    const outstandingHours = attendance?.reduce((sum, a) => {
+        const attendanceDate = new Date(a.workDate);
+        if (!lastPaidDate || attendanceDate > lastPaidDate) {
+            return sum + (a.hoursWorked || 0) + (a.overtimeHours || 0);
+        }
+        return sum;
+    }, 0) || 0;
     
+    const dummyHourlyRate = 40;
+    const hourlyRate = salaries && salaries.length > 0 ? salaries[0].amount / 2080 : dummyHourlyRate;
 
     return (
         <div className="p-6 space-y-6">
@@ -69,7 +101,7 @@ export default function EmployeePayroll() {
                         <CardContent>
                         <div className="flex justify-between">
                             <div>
-                                <div className="text-2xl font-bold">$ { salaries && salaries.length > 0 ? salaries[0].amount : "N/A" }</div>
+                                <div className="text-2xl font-bold">{ salaries && salaries.length > 0 ? fmt(salaries[0].amount) : "N/A" }</div>
                             </div>
                             <p>
                                 <span className="text-xs px-2 py-1 rounded-full font-medium bg-green-100 text-green-700">
@@ -99,7 +131,7 @@ export default function EmployeePayroll() {
                         <CardContent>
                             <div className="flex justify-between">
                                 <div>
-                                    <div className="text-2xl font-bold">$ { salaries && salaries.length > 0 ? salaries[0].amount : "N/A" }</div>
+                                    <div className="text-2xl font-bold">{ fmt(outstandingHours * hourlyRate) }</div>
                                 </div>
                                 <p>
                                     <span className="text-xs px-2 py-1 rounded-full font-medium bg-orange-100 text-orange-700">
