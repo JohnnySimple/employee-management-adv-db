@@ -103,3 +103,5 @@ export async function POST(req:Request){
         return NextResponse.json({error:"Failed to create leave date entry"}, {status:500});
     }
 }
+
+// Updates to the status of a leave data entry(eg: marking it as approved or rejected)

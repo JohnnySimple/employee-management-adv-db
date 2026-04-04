@@ -48,6 +48,14 @@ interface AttendanceRecord {
     leaveDateStatus: string;
 }
 
+const COLORS = {
+    approved: "#22c55e", // green
+    pending: "#f59e0b",  // yellow
+    rejected: "#ef4444", // red
+    primary: "#6366f1",  // indigo
+    muted: "#94a3b8"     // slate
+};
+
 
 export default function AdminAttendancePage() {
     const [search, setSearch] = useState("");
@@ -68,7 +76,7 @@ export default function AdminAttendancePage() {
             }
         }
         fetchData();
-    },[]);
+    }, []);
 
     const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
@@ -198,11 +206,33 @@ export default function AdminAttendancePage() {
                     </CardHeader>
                     <CardContent className="h-100">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={hoursData}>
-                                <XAxis dataKey="day" />
-                                <YAxis />
-                                <ReTooltip />
-                                <Line type="monotone" dataKey="hours" strokeWidth={2} />
+                            <LineChart data={hoursData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                                <XAxis
+                                    dataKey="day"
+                                    tick={{ fontSize: 12 }}
+                                    stroke="#94a3b8"
+                                />
+                                <YAxis
+                                    tick={{ fontSize: 12 }}
+                                    stroke="#94a3b8"
+                                />
+
+                                <ReTooltip
+                                    contentStyle={{
+                                        borderRadius: "10px",
+                                        border: "none",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                                    }}
+                                />
+
+                                <Line
+                                    type="monotone"
+                                    dataKey="hours"
+                                    stroke={COLORS.primary}
+                                    strokeWidth={3}
+                                    dot={{ r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -215,10 +245,21 @@ export default function AdminAttendancePage() {
                     <CardContent className="h-100">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={statusData} dataKey="value" nameKey="name" label>
-                                    {statusData.map((_, i) => (
-                                        <Cell key={i} />
-                                    ))}
+                                <Pie data={statusData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    innerRadius={60}
+                                    outerRadius={90}
+                                    paddingAngle={3}>
+                                    {statusData.map((entry, index) => {
+                                        const color =
+                                            entry.name === "Approved"
+                                                ? COLORS.approved
+                                                : entry.name === "Pending"
+                                                    ? COLORS.pending
+                                                    : COLORS.rejected;
+                                        return <Cell key={`cell-${index}`} fill={color} />;
+                                    })}
                                 </Pie>
                                 <ReTooltip />
                             </PieChart>
@@ -233,11 +274,23 @@ export default function AdminAttendancePage() {
                     </CardHeader>
                     <CardContent className="h-100">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={otData}>
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <ReTooltip />
-                                <Bar dataKey="value" />
+                            <BarChart data={otData} margin={{ top: 10, right: 20, left: -10 }}>
+                                <XAxis stroke="#94a3b8" />
+                                <YAxis stroke="#94a3b8" />
+
+                                <ReTooltip
+                                    contentStyle={{
+                                        borderRadius: "10px",
+                                        border: "none",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                                    }}
+                                />
+
+                                <Bar
+                                    dataKey="value"
+                                    radius={[8, 8, 0, 0]}
+                                    fill={COLORS.primary}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -292,7 +345,7 @@ export default function AdminAttendancePage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem>{row.leaveDateStatus==="Approved"? "":"Approve Request"}</DropdownMenuItem>
+                                            <DropdownMenuItem>{row.leaveDateStatus === "Approved" ? "" : "Approve Request"}</DropdownMenuItem>
                                             <DropdownMenuItem>Reject Request</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
