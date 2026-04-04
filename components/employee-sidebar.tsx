@@ -75,7 +75,7 @@ export function EmployeeSidebar() {
                     </SidebarMenu>
                 </SidebarGroup>
 
-                <SidebarGroup>
+                {/* <SidebarGroup>
                     <SidebarGroupLabel>Analytics</SidebarGroupLabel>
                     <SidebarMenu>
                         <SidebarMenuItem>
@@ -87,7 +87,7 @@ export function EmployeeSidebar() {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
-                </SidebarGroup>
+                </SidebarGroup> */}
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>

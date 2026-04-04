@@ -44,7 +44,8 @@ interface AttendanceRecord {
     startDate: string,
     endDate: string,
     hoursOff: number,
-    status: string;
+    status: string,
+    leaveDateStatus: string;
 }
 
 
@@ -69,9 +70,9 @@ export default function AdminAttendancePage() {
         fetchData();
     },[]);
 
-    const approvedCount = leaveData.filter((r) => r.status === "Approved").length;
-    const pendingCount = leaveData.filter((r) => r.status === "Pending").length;
-    const rejectedCount = leaveData.filter((r) => r.status === "Rejected").length;
+    const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
+    const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
+    const rejectedCount = leaveData.filter((r) => r.leaveDateStatus === "Rejected").length;
 
     const totalHoursOff = leaveData.reduce(
         (sum, r) => sum + (r.hoursOff || 0),
@@ -272,8 +273,8 @@ export default function AdminAttendancePage() {
                                 <TableCell>
                                     <Tooltip>
                                         <TooltipTrigger>
-                                            <span className={row.status === "Approved" ? "text-green-500 border rounded-xl" : row.status === "Pending" ? "text-yellow-500 border rounded-xl" : row.status === "Rejected" ? "text-red-500 border rounded-xl" : ""}>
-                                                {row.status}
+                                            <span className={row.leaveDateStatus === "Approved" ? "text-green-500 border rounded-xl px-2 py-1" : row.leaveDateStatus === "Pending" ? "text-yellow-500 border rounded-xl px-2 py-1" : row.leaveDateStatus === "Rejected" ? "text-red-500 border rounded-xl px-2 py-1" : ""}>
+                                                {row.leaveDateStatus}
                                             </span>
                                         </TooltipTrigger>
                                         <TooltipContent>
@@ -291,7 +292,7 @@ export default function AdminAttendancePage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem>{row.status==="Approved"? "":"Approve Request"}</DropdownMenuItem>
+                                            <DropdownMenuItem>{row.leaveDateStatus==="Approved"? "":"Approve Request"}</DropdownMenuItem>
                                             <DropdownMenuItem>Reject Request</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>

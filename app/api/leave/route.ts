@@ -24,7 +24,8 @@ export async function GET(){
             startDate:lr.startDate,
             endDate:lr.endDate,
             hoursOff:lr.hoursOff,
-            status:lr.employeeLeave.status
+            status:lr.employeeLeave.status,
+            leaveDateStatus: lr.status
         }));
 
         return NextResponse.json(formattedLeaveRequests);

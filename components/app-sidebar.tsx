@@ -52,28 +52,28 @@ export function AppSidebar() {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
 
-                        <SidebarMenuItem>
+                        {/* <SidebarMenuItem>
                             <SidebarMenuButton asChild>
                                 <Link href="/admin/departments">
                                     <Building2 className="mr-2 h-4 w-4" />
                                     Departments
                                 </Link>
                             </SidebarMenuButton>
-                        </SidebarMenuItem>
+                        </SidebarMenuItem> */}
                     </SidebarMenu>
                 </SidebarGroup>
 
                 <SidebarGroup>
                     <SidebarGroupLabel>Management</SidebarGroupLabel>
                     <SidebarMenu>
-                        <SidebarMenuItem>
+                        {/* <SidebarMenuItem>
                             <SidebarMenuButton asChild>
                                 <Link href="/admin/roles">
                                     <Shield className="mr-2 h-4 w-4" />
                                     Roles & Permissions
                                 </Link>
                             </SidebarMenuButton>
-                        </SidebarMenuItem>
+                        </SidebarMenuItem> */}
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
                                 <Link href="/admin/attendance">
@@ -90,18 +90,18 @@ export function AppSidebar() {
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
-                        <SidebarMenuItem>
+                        {/* <SidebarMenuItem>
                             <SidebarMenuButton asChild>
                                 <Link href="/admin/user-accounts">
                                     <User className="mr-2 h-4 w-4" />
                                     User Accounts
                                 </Link>
                             </SidebarMenuButton>
-                        </SidebarMenuItem>
+                        </SidebarMenuItem> */}
                     </SidebarMenu>
                 </SidebarGroup>
 
-                <SidebarGroup>
+                {/* <SidebarGroup>
                     <SidebarGroupLabel>Analytics</SidebarGroupLabel>
                     <SidebarMenu>
                         <SidebarMenuItem>
@@ -113,7 +113,7 @@ export function AppSidebar() {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
-                </SidebarGroup>
+                </SidebarGroup> */}
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
