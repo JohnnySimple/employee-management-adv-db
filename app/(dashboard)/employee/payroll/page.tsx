@@ -10,6 +10,7 @@ export default function EmployeePayroll() {
 
     const [salaries, setSalaries] = useState(null);
     const [attendance, setAttendance] = useState(null);
+    const [me, setMe] = useState(null);
 
     useEffect(() => {
         const fetchSalaries = async () => {
@@ -37,6 +38,20 @@ export default function EmployeePayroll() {
         fetchAttendance();
     }, [])
 
+    useEffect(() => {
+        const fetchMe = async () => {
+            try {
+                const response = await api.get("/me");
+                setMe(response.data);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+
+        fetchMe();
+    }, [])
+
+
     const fmt = (n: number) =>
         new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
@@ -53,8 +68,9 @@ export default function EmployeePayroll() {
         return sum;
     }, 0) || 0;
     
-    const dummyHourlyRate = 40;
-    const hourlyRate = salaries && salaries.length > 0 ? salaries[0].amount / 2080 : dummyHourlyRate;
+    // const dummyHourlyRate = 40;
+    // const hourlyRate = salaries && salaries.length > 0 ? salaries[0].amount / 2080 : dummyHourlyRate;
+    const hourlyRate = me?.employee?.jobTitle.payRate || 40;
 
     return (
         <div className="p-6 space-y-6">

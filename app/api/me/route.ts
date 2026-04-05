@@ -12,7 +12,10 @@ export async function GET() {
     // get employee details from the user object and return
     const employeeId = Number(user.employeeId);
     const employee = await prisma.employee.findUnique({
-        where: { employeeId }
+        where: { employeeId },
+        include: {
+            jobTitle: true
+        }
     });
 
     return NextResponse.json({
