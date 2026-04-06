@@ -29,6 +29,7 @@ import EmployeeActionsDropdown from "./employee-actions-dropdown";
                             <TableHead>Department</TableHead>
                             <TableHead>Job Title</TableHead>
                             <TableHead className="text-center">Job Status</TableHead>
+                            <TableHead>Account Status</TableHead>
                             <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -45,6 +46,17 @@ import EmployeeActionsDropdown from "./employee-actions-dropdown";
                                 <TableCell className="text-sm font-medium">{employee.jobTitle.titleName}</TableCell>
                                 <TableCell className="text-center">
                                     {employee.jobStatus}
+                                </TableCell>
+                                <TableCell>
+                                    { employee.user ? (
+                                        employee.user.isActive ? (
+                                            <span className="text-green-600 font-medium">Active</span>
+                                        ) : (
+                                            <span className="text-red-600 font-medium">Disabled</span>
+                                        )
+                                    ) : (
+                                        <span className="text-gray-500 font-medium">No Account</span>
+                                    )}
                                 </TableCell>
                                 <TableCell>
                                     <EmployeeActionsDropdown employee={employee} />

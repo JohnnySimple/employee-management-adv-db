@@ -6,10 +6,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useState } from "react";
 import { useEmployee } from "../providers/admin-employee-provider";
 import { Employee } from "@/types/employee";
+import { toast } from "sonner";
+import api from "@/lib/api";
+
 
 export default function EmployeeActionsDropdown({ employee }: { employee: Employee }) {
 
     const { openEditEmployeeModal, openCreateUserAccountModal, openResetPasswordModal } = useEmployee();
+
+    const toggleAccountStatus = async (employee: Employee) => {
+        
+        try {
+            const response = await api.post("/protected/admin/toggle-account-status", employee);
+            toast.success("Account status updated successfully!");
+            
+        } catch (error) {
+            toast.error("Failed to update account status.");
+        }
+    }
 
     return (
         <DropdownMenu>
@@ -29,9 +43,16 @@ export default function EmployeeActionsDropdown({ employee }: { employee: Employ
                 <DropdownMenuItem onClick={() => openResetPasswordModal(employee)}>
                     Reset Password
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                    Disable Account
-                </DropdownMenuItem>
+
+                {employee.user?.isActive ? (
+                    <DropdownMenuItem onClick={() => toggleAccountStatus(employee)}>
+                        Disable Account
+                    </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem onClick={() => toggleAccountStatus(employee)}>
+                        Enable Account
+                    </DropdownMenuItem>
+                )}
             </DropdownMenuContent>
         </DropdownMenu>
     )

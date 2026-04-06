@@ -9,7 +9,8 @@ export async function GET(){
             // where:{jobStatus:'ACTIVE'},
             include:{
                 department:true,
-                jobTitle:true
+                jobTitle:true,
+                user: true
             }
         });
 

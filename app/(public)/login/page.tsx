@@ -50,7 +50,7 @@ export default function Loginpage() {
                 router.push("/")
             }
         } catch (error: any) {
-            console.error(error)
+            // console.error(error)
             alert(error.response?.data?.error || "Login failed")
         }
     }
