@@ -456,7 +456,7 @@ const leaveData = [
 ];
 
 for (const leave of leaveData) {
-    // Logic: Only subtract from the 80-hour balance if it's actually Approved
+    
     const hoursToDeduct = leave.status === "Approved" ? leave.hours : 0;
 
     const empLeave = await prisma.employeeLeave.create({
