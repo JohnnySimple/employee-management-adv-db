@@ -67,6 +67,7 @@ export default function TotalHoursWorkedChart({ data }: { data: { date: string, 
                                 border: "1px solid #e5e7eb",
                                 fontSize: "12px",
                                 }}
+                                formatter={(value: number) => value.toFixed(1)}
                             />
 
                             <defs>
