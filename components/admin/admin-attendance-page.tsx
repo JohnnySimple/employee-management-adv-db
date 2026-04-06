@@ -34,19 +34,27 @@ import { useState, useEffect } from "react";
 
 import { getAttendanceRecords } from "./attendancerecords/getAttendanceRecords";
 import { toast } from "sonner";
+import api from "@/lib/api";
 
 // Design an Interface which matches the attendance record structure\
 interface AttendanceRecord {
-    leaveDate: string,
+    leaveDate: number,
     employeeName: string,
     employeeId: string,
     leaveType: string,
     startDate: string,
     endDate: string,
     hoursOff: number,
-    status: string,
     leaveDateStatus: string;
 }
+
+const COLORS = {
+    approved: "#22c55e", // green
+    pending: "#f59e0b",  // yellow
+    rejected: "#ef4444", // red
+    primary: "#6366f1",  // indigo
+    muted: "#94a3b8"     // slate
+};
 
 
 export default function AdminAttendancePage() {
@@ -54,6 +62,48 @@ export default function AdminAttendancePage() {
     const [leaveData, setLeaveData] = useState<AttendanceRecord[]>([]); //pass the attendance interface as a generic
     const [loading, setLoading] = useState(false);
 
+    const [updatingId, setUpdatingId] = useState<number | null>(null);
+
+async function updateStatus(leaveDate: number, status: string) {
+    try {
+        setUpdatingId(leaveDate);
+
+        // Send PATCH request with correct field names
+        const payload = {
+            leaveDateId: Number(leaveDate), // backend still expects leaveDateId
+            status,
+        };
+
+        console.log("Sending PATCH request with payload:", payload);
+
+        const res = await api.patch("/leave", payload);
+
+        toast.success(`Request ${status}`);
+
+        // Update frontend state to match interface
+        setLeaveData((prev) =>
+            prev.map((r) =>
+                r.leaveDate === leaveDate
+                    ? { ...r, leaveDateStatus: status } // match interface property
+                    : r
+            )
+        );
+
+    } catch (error: any) {
+        console.error("Axios error:", error);
+
+        const message =
+            error?.response?.data?.error ||
+            error?.message ||
+            "Failed to update status";
+
+        toast.error(message);
+    } finally {
+        setUpdatingId(null);
+    }
+}
+
+// Load attendance records on component mount
     useEffect(() => {
         async function fetchData() {
             try {
@@ -68,7 +118,7 @@ export default function AdminAttendancePage() {
             }
         }
         fetchData();
-    },[]);
+    }, []);
 
     const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
@@ -105,7 +155,6 @@ export default function AdminAttendancePage() {
         return (
             <div className="flex items-center justify-center ">
                 <Loader className="w-12 h-12 animate-spin text-gray-500">
-                    Fetching Data...
                 </Loader>
             </div>
         )
@@ -198,11 +247,33 @@ export default function AdminAttendancePage() {
                     </CardHeader>
                     <CardContent className="h-100">
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={hoursData}>
-                                <XAxis dataKey="day" />
-                                <YAxis />
-                                <ReTooltip />
-                                <Line type="monotone" dataKey="hours" strokeWidth={2} />
+                            <LineChart data={hoursData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
+                                <XAxis
+                                    dataKey="day"
+                                    tick={{ fontSize: 12 }}
+                                    stroke="#94a3b8"
+                                />
+                                <YAxis
+                                    tick={{ fontSize: 12 }}
+                                    stroke="#94a3b8"
+                                />
+
+                                <ReTooltip
+                                    contentStyle={{
+                                        borderRadius: "10px",
+                                        border: "none",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                                    }}
+                                />
+
+                                <Line
+                                    type="monotone"
+                                    dataKey="hours"
+                                    stroke={COLORS.primary}
+                                    strokeWidth={3}
+                                    dot={{ r: 4 }}
+                                    activeDot={{ r: 6 }}
+                                />
                             </LineChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -215,10 +286,21 @@ export default function AdminAttendancePage() {
                     <CardContent className="h-100">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={statusData} dataKey="value" nameKey="name" label>
-                                    {statusData.map((_, i) => (
-                                        <Cell key={i} />
-                                    ))}
+                                <Pie data={statusData}
+                                    dataKey="value"
+                                    nameKey="name"
+                                    innerRadius={60}
+                                    outerRadius={90}
+                                    paddingAngle={3}>
+                                    {statusData.map((entry, index) => {
+                                        const color =
+                                            entry.name === "Approved"
+                                                ? COLORS.approved
+                                                : entry.name === "Pending"
+                                                    ? COLORS.pending
+                                                    : COLORS.rejected;
+                                        return <Cell key={`cell-${index}`} fill={color} />;
+                                    })}
                                 </Pie>
                                 <ReTooltip />
                             </PieChart>
@@ -233,11 +315,23 @@ export default function AdminAttendancePage() {
                     </CardHeader>
                     <CardContent className="h-100">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={otData}>
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <ReTooltip />
-                                <Bar dataKey="value" />
+                            <BarChart data={otData} margin={{ top: 10, right: 20, left: -10 }}>
+                                <XAxis stroke="#94a3b8" />
+                                <YAxis stroke="#94a3b8" />
+
+                                <ReTooltip
+                                    contentStyle={{
+                                        borderRadius: "10px",
+                                        border: "none",
+                                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                                    }}
+                                />
+
+                                <Bar
+                                    dataKey="value"
+                                    radius={[8, 8, 0, 0]}
+                                    fill={COLORS.primary}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -292,8 +386,8 @@ export default function AdminAttendancePage() {
                                             </Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
-                                            <DropdownMenuItem>{row.leaveDateStatus==="Approved"? "":"Approve Request"}</DropdownMenuItem>
-                                            <DropdownMenuItem>Reject Request</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={()=>updateStatus(row.leaveDate,"Approved")}>{row.leaveDateStatus === "Approved" ? "" : "Approve Request"}</DropdownMenuItem>
+                                            <DropdownMenuItem onClick={()=>updateStatus(row.leaveDate,"Rejected")}>Reject Request</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
                                 </TableCell>
