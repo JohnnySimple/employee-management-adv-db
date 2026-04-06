@@ -121,13 +121,15 @@ export default function AdminPayroll() {
 
     
     try {
-      const [salaryRes, attendanceRes] = await Promise.all([
+      const [salaryRes, attendanceRes, jobTitleRes] = await Promise.all([
         api.get("/salary"),
         api.get("/attendance"),
+        api.get("/jobTitle")
       ]);
 
       const salary: SalaryRecord[] = salaryRes.data;
       const attendance = attendanceRes.data;
+      const jobTitle = jobTitleRes.data;
 
       setAttendance(attendance);
 
@@ -162,20 +164,30 @@ export default function AdminPayroll() {
 
     setOvertimeHours(monthlyOvertimeTotal);
 
-    const getHourlyRate = (annualSalary: number) => annualSalary / 2080;
 
-    const totalPayroll = attendance.reduce((acc: number, record: any) => {
+// 1. Create a quick lookup map from the nested array
+// Based on your data: {"jobTitles": [...]}
+const rateMap = new Map<number, number>(
+  (jobTitle?.jobTitles || []).map((j: any) => [
+    Number(j.jobTitleId), 
+    Number(j.payRate)
+  ])
+);
+
+const totalPayroll = attendance.reduce((acc: number, record: any) => {
   const itemDate = new Date(record.workDate);
   
-  // Only process if it's this month
   if (itemDate.getMonth() === currentMonth && itemDate.getFullYear() === currentYear) {
     
-    // 2. Find the matching salary for this employee
-    const employeeSalaryRecord = salary.find((s: any) => s.employeeId === record.employeeId);
+    // 1. Get the Job Title ID
+    const jobId = record.employee?.jobTitleId;
     
-    if (employeeSalaryRecord) {
-      const hourlyRate = getHourlyRate(employeeSalaryRecord.amount);
-      const overtimeRate = hourlyRate * 1.5;
+    // 2. Look up the rate (Note: rateMap.get returns number | undefined)
+    const hourlyRate = rateMap.get(jobId);
+    
+    // 3. FIX: Ensure hourlyRate is a number before doing arithmetic
+    if (typeof hourlyRate === 'number') {
+      const overtimeRate = hourlyRate * 1.5; // Error ts(2362) gone!
 
       const regularPay = (record.hoursWorked || 0) * hourlyRate;
       const overtimePay = (record.overtimeHours || 0) * overtimeRate;
@@ -206,6 +218,7 @@ attendance.forEach((record: any) => {
       employeeMap.set(id, {
         id: id,
         name: `${record.employee.firstName} ${record.employee.lastName}`,
+        jobTitle: record.employee.jobTitleId,
         totalHours: 0,
         totalOvertime: 0
       });
@@ -218,9 +231,9 @@ attendance.forEach((record: any) => {
 });
 
 const finalPayroll = Array.from(employeeMap.values()).map((emp) => {
-  const salaryRecord = salary.find((s: any) => s.employeeId === emp.id);
-  const hourlyRate = salaryRecord ? salaryRecord.amount / 2080 : 0;
-  
+const salaryRecord = salary.find((s: any) => s.employeeId === emp.id);
+const hourlyRate: number = rateMap.get(Number(emp.jobTitle)) ?? 0;
+
   const earnings = (emp.totalHours * hourlyRate) + (emp.totalOvertime * (hourlyRate * 1.5));
 
   return {
@@ -357,7 +370,10 @@ const handleClear = () => {
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${totalPayrollMonth.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{Number(totalPayrollMonth).toLocaleString("en-US", {
+                style: "currency",
+                currency: "USD",
+                })}</div>
               <p className="text-xs text-muted-foreground">
                 {mtdVsLast !== null ? (
                   <span className={Number(mtdVsLast) >= 0 ? "text-green-600" : "text-red-500"}>
@@ -377,7 +393,7 @@ const handleClear = () => {
               <Clock className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalHoursThisMonth.toLocaleString()}h</div>
+              <div className="text-2xl font-bold">{totalHoursThisMonth.toFixed(2)}h</div>
               <p className="text-xs text-muted-foreground">Across all employees</p>
             </CardContent>
           </Card>
@@ -543,10 +559,10 @@ const handleClear = () => {
                         <td className="px-6 py-3 text-muted-foreground">{emp.id}</td>
                         <td className="px-2 py-3">
                           <div className="font-medium text-zinc-800">{emp.name}</div>
-                          <div className="text-xs text-muted-foreground">~{fmt(emp.annual)}/yr</div>
+                          <div className="text-xs text-muted-foreground">{fmt(emp.annual)}/yr</div>
                         </td>
                         <td className="px-2 py-3 text-right font-medium">{fmt(emp.earnings)}</td>
-                        <td className="px-6 py-3 text-right text-zinc-600">{emp.hours + emp.overtime}h</td>
+                        <td className="px-6 py-3 text-right text-zinc-600">{(emp.hours + emp.overtime).toFixed(2)}hrs</td>
                       </tr>
                     ))}
                   </tbody>
