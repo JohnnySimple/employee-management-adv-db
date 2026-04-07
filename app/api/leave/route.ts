@@ -10,7 +10,7 @@ export async function GET(){
                     include:{
                         employee:true,
                         leave:true
-                    }
+                    },
                 }
             }
         });
