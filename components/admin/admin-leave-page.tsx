@@ -8,7 +8,10 @@ import {
     BarChart,
     Bar,
     Pie,
-    Cell
+    Cell,
+    AreaChart,
+    Area,
+    CartesianGrid
 } from "recharts";
 import {
     Card,
@@ -21,7 +24,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Clock, Play, UserCheck, AlertCircle, Edit2, ClockAlert, Loader } from "lucide-react";
+import { Clock, UserCheck, AlertCircle, Edit2, Loader, User, Calendar } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -51,6 +54,10 @@ const COLORS = {
     pending: "#f59e0b",  // yellow
     rejected: "#ef4444", // red
     primary: "#6366f1",  // indigo
+    secondary: "#3b82f6", // blue
+    gradientStart: "#6366f1",
+    gradientEnd: "#a5b4fc"
+
 };
 
 
@@ -126,38 +133,54 @@ export default function AdminLeavePage() {
     // const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const today = new Date();
     const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
-    const upcomingApprovals = leaveData.filter((r) => r.leaveDateStatus === "Approved" && new Date(r.startDate) > today).length;
     const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
+    const rejectedCount = leaveData.filter((r) => r.leaveDateStatus === "Rejected").length;
+    //Upcoming Leaves
+    const upcomingLeaves = leaveData.filter((r) => r.leaveDateStatus === "Approved" && new Date(r.startDate) > today).length;
+    // Employees on Leave Today
+    const onLeaveToday = leaveData.filter((r) => new Date(r.startDate) <= today && new Date(r.endDate) >= today).length;
 
-    const totalHoursOff = leaveData.reduce(
-        (sum, r) => sum + (r.hoursOff || 0),
-        0
-    );
+    const totalHoursOff = leaveData.reduce((sum, r) => sum + (r.hoursOff || 0), 0);
+    const avgHoursOff = leaveData.length ? (totalHoursOff / leaveData.length).toFixed(1) : 0;
 
-    // Chart Data 1. Leave type distribution
-    const leaveTypeMap: Record<string, number> = {};
+    // Most common Leave Type
+    const typeMap: Record<string, number> = {};
     leaveData.forEach((r) => {
-        leaveTypeMap[r.leaveType] = (leaveTypeMap[r.leaveType] || 0) + 1;
+        typeMap[r.leaveType] = (typeMap[r.leaveType] || 0) + 1;
     });
 
-    const leaveTypeData = Object.keys(leaveTypeMap).map((key) => ({
+    // find the most common leave type
+    const mostCommonLeaveType = Object.entries(typeMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+
+    // Status Pie Chart Data
+    const statusData = [
+        { name: "Approved", value: approvedCount },
+        { name: "Pending", value: pendingCount },
+        { name: "Rejected", value: rejectedCount }
+    ];
+
+    // Monthly Leave Trends (Leaves per month)
+    const monthlyMap: Record<string, number> = {};
+    leaveData.forEach((r) => {
+        const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
+        monthlyMap[month] = (monthlyMap[month] || 0) + 1;
+    })
+
+    const monthlyData = Object.keys(monthlyMap).map(key => ({
         name: key,
-        value: leaveTypeMap[key],
+        value: monthlyMap[key]
     }));
 
-    // Leaves per employee
-    const employeeLeaveMap: Record<string, number> = {};
-    leaveData.forEach((r) => {
-        employeeLeaveMap[r.employeeName] = (employeeLeaveMap[r.employeeName] || 0) + 1;
+    // Top Employees with most leaves
+    const empMap: Record<string, number> = {};
+    leaveData.forEach(r => {
+        empMap[r.employeeName] = (empMap[r.employeeName] || 0) + r.hoursOff;
     });
 
-    const employeeLeaveData = Object.keys(employeeLeaveMap).map((key) => ({
-        name: key,
-        value: employeeLeaveMap[key],
-    }))
-
-
-
+    const topEmployees = Object.keys(empMap)
+        .map(key => ({ name: key, value: empMap[key] }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 5);
 
     const filteredData = leaveData.filter((row) =>
         row.employeeName.toLowerCase().includes(search.toLowerCase())
@@ -177,7 +200,7 @@ export default function AdminLeavePage() {
             <Toaster />
             <h1 className="font-bold tracking-wide text-2xl">Leave Management</h1>
             {/* Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-col-3 lg-grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-col-3 lg-grid-cols-4 gap-6">
                 {/* Total Hours Card */}
                 <Card>
                     <CardHeader>
@@ -193,24 +216,24 @@ export default function AdminLeavePage() {
                 {/* Upcoming Leave / Scheduled LeavePresent Card */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="Tracking-widest font-bold">Upcoming Leave | Scheduled Leave</CardTitle>
+                        <CardTitle className="Tracking-widest font-bold">Pending Requests</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <UserCheck className="w-6 h-6 text-yellow-500" />
-                            <span className="tracking-wide text-xl font-bold">{upcomingApprovals}</span>
+                            <span className="tracking-wide text-xl font-bold">{pendingCount}</span>
                         </div>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="Tracking-widest font-bold">Pending Leave Requests</CardTitle>
+                        <CardTitle className="Tracking-widest font-bold">Rejected Leave Requests</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <AlertCircle className="w-6 h-6 text-yellow-500" />
-                            <span className="tracking-wide text-xl font-bold">{pendingCount}</span>
+                            <span className="tracking-wide text-xl font-bold">{rejectedCount}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -226,117 +249,189 @@ export default function AdminLeavePage() {
                         </div>
                     </CardContent>
                 </Card>
-                {/* Search Filters */}
-
-                {/* Attendance Table */}
-                <div className="flex gap-4">
-                    <Input type="text" placeholder="Search Employee" value={search} onChange={(e) => setSearch(e.target.value)} className="input" />
-                </div>
-                <TooltipProvider>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Employee</TableHead>
-                                <TableHead>LeaveType</TableHead>
-                                <TableHead>Start Date</TableHead>
-                                <TableHead>EndDate</TableHead>
-                                <TableHead>Hours Off</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredData.map((row) => (
-                                <TableRow key={row.leaveDate}>
-                                    <TableCell>{row.employeeName}</TableCell>
-                                    <TableCell>{row.leaveType}</TableCell>
-                                    <TableCell>{new Date(row.startDate).toLocaleDateString()}</TableCell>
-                                    <TableCell>{new Date(row.endDate).toLocaleDateString()}</TableCell>
-                                    <TableCell>{row.hoursOff}</TableCell>
-                                    <TableCell>
-                                        <Tooltip>
-                                            <TooltipTrigger>
-                                                <span className={row.leaveDateStatus === "Approved" ? "text-green-500 border rounded-xl px-2 py-1" : row.leaveDateStatus === "Pending" ? "text-yellow-500 border rounded-xl px-2 py-1" : row.leaveDateStatus === "Rejected" ? "text-red-500 border rounded-xl px-2 py-1" : ""}>
-                                                    {row.leaveDateStatus}
-                                                </span>
-                                            </TooltipTrigger>
-                                            <TooltipContent>
-                                                <p>{row.leaveType}</p>
-                                            </TooltipContent>
-                                        </Tooltip>
-                                    </TableCell>
-
-                                    <TableCell>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="outline" size="sm">
-                                                    <Edit2 className="w-4 h-4" />
-                                                    Edit
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent>
-                                                <DropdownMenuItem onClick={() => updateStatus(row.leaveDate, "Approved")}>{row.leaveDateStatus === "Approved" ? "" : "Approve Request"}</DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => updateStatus(row.leaveDate, "Rejected")}>Reject Request</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </TableCell>
+                {/* On Leave Today */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="Tracking-widest font-bold">On Leave Today</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-2">
+                            <User className="w-6 h-6 text-green-500" />
+                            <span className="tracking-wide text-xl font-bold">{onLeaveToday}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+                {/* Upcoming Leaves */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="tracking-widest font-bold">Upcoming Leaves</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-2">
+                            <Calendar className="w-6 h-6 text-blue-500" />
+                            <span className="tracking-wide text-xl font-bold">{upcomingLeaves}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+                {/* Average Hours Off */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="tracking-widest font-bold">Average Hours Off</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-2">
+                            <Clock className="w-6 h-6 text-blue-500" />
+                            <span className="tracking-wide text-xl font-bold">{avgHoursOff}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+                {/* Most Common Leave Type */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="tracking-widest font-bold">Most Common Leave Type</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-2">
+                            <Calendar className="w-6 h-6 text-blue-500" />
+                            <span className="tracking-wide text-xl font-bold">{mostCommonLeaveType}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+            {/* Search Filters */}
+            <div className="w-full">
+                <Input type="text" placeholder="Search Employee" value={search} onChange={(e) => setSearch(e.target.value)} className="input" />
+            </div>
+            {/* Attendance Table */}
+            <div className="border rounded-lg overflow-hidden">
+                <div className="max-h-[400px] overflow-y-auto">
+                    <TooltipProvider>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Employee</TableHead>
+                                    <TableHead>LeaveType</TableHead>
+                                    <TableHead>Start Date</TableHead>
+                                    <TableHead>EndDate</TableHead>
+                                    <TableHead>Hours Off</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Action</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TooltipProvider>
-                {/* Charts */}
-                <div className="grid md:grid-cols-2 gap-6">
-                    {/* Leave Type Distribution */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-bold tracking-widest">Leave Type Distribution</CardTitle>
-                        </CardHeader>
-                        <CardContent className="h-75">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie
-                                        data={leaveTypeData}
-                                        dataKey="value"
-                                        nameKey="name"
-                                        outerRadius={100}
-                                    >
-                                        {leaveTypeData.map((_, i) => (
-                                            <Cell
-                                                key={i}
-                                                fill={
-                                                    i % 3 === 0
-                                                        ? COLORS.approved
-                                                        : i % 3 === 1
-                                                            ? COLORS.pending
-                                                            : COLORS.rejected
-                                                }
-                                            />
-                                        ))}
-                                    </Pie>
-                                    <ReTooltip />
-                                </PieChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredData.map((row) => (
+                                    <TableRow key={row.leaveDate}>
+                                        <TableCell>{row.employeeName}</TableCell>
+                                        <TableCell>{row.leaveType}</TableCell>
+                                        <TableCell>{new Date(row.startDate).toLocaleDateString()}</TableCell>
+                                        <TableCell>{new Date(row.endDate).toLocaleDateString()}</TableCell>
+                                        <TableCell>{row.hoursOff}</TableCell>
+                                        <TableCell>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <span className={row.leaveDateStatus === "Approved" ? "text-green-500 border rounded-xl px-2 py-1" : row.leaveDateStatus === "Pending" ? "text-yellow-500 border rounded-xl px-2 py-1" : row.leaveDateStatus === "Rejected" ? "text-red-500 border rounded-xl px-2 py-1" : ""}>
+                                                        {row.leaveDateStatus}
+                                                    </span>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>{row.leaveType}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TableCell>
 
-                    {/* Leaves per Employee */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="font-bold tracking-widest">Leaves Per Employee</CardTitle>
-                        </CardHeader>
-                        <CardContent className="h-75">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={employeeLeaveData}>
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <ReTooltip />
-                                    <Bar dataKey="value" fill={COLORS.primary} />
-                                </BarChart>
-                            </ResponsiveContainer>
-                        </CardContent>
-                    </Card>
+                                        <TableCell>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="outline" size="sm">
+                                                        <Edit2 className="w-4 h-4" />
+                                                        Edit
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent>
+                                                    <DropdownMenuItem onClick={() => updateStatus(row.leaveDate, "Approved")}>{row.leaveDateStatus === "Approved" ? "" : "Approve Request"}</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => updateStatus(row.leaveDate, "Rejected")}>Reject Request</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TooltipProvider>
                 </div>
+            </div>
+            {/* Charts */}
+            <div className="grid grid-cols-1 gap-4">
+                <Card>
+                    <CardHeader><CardTitle>Status Breakdown</CardTitle></CardHeader>
+                    <CardContent className="h-[350px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                                <Pie data={statusData} dataKey="value" outerRadius={120} innerRadius={60} paddingAngle={5} cornerRadius={8}>
+                                    <Cell fill={COLORS.approved} />
+                                    <Cell fill={COLORS.pending} />
+                                    <Cell fill={COLORS.rejected} />
+                                </Pie>
+                                <ReTooltip />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
+                {/* BAR */}
+                <Card>
+                    <CardHeader><CardTitle>Monthly Leaves</CardTitle></CardHeader>
+                    <CardContent className="h-[350px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={monthlyData} margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <ReTooltip />
+                                <Bar dataKey="value" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
+                {/* TOP EMPLOYEES */}
+                <Card>
+                    <CardHeader><CardTitle>Top Employees</CardTitle></CardHeader>
+                    <CardContent className="h-[350px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={topEmployees} layout="vertical" margin={{ left: 30 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis type="number" />
+                                <YAxis type="category" dataKey="name" />
+                                <ReTooltip />
+                                <Bar dataKey="value" fill={COLORS.secondary} radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
+                {/* AREA CHART */}
+                <Card>
+                    <CardHeader><CardTitle>Monthly Leave Trend</CardTitle></CardHeader>
+                    <CardContent className="h-[350px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <AreaChart data={monthlyData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
+                                <defs>
+                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor={COLORS.gradientStart} stopOpacity={0.8} />
+                                        <stop offset="95%" stopColor={COLORS.gradientEnd} stopOpacity={0} />
+                                    </linearGradient>
+                                </defs>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <ReTooltip />
+                                <Area type="monotone" dataKey="value" stroke={COLORS.primary} fill="url(#colorValue)" />
+                            </AreaChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
+
             </div>
         </div>
     )
