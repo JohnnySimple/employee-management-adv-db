@@ -198,9 +198,9 @@ export default function AdminLeavePage() {
     return (
         <div className="space-y-6 p-6">
             <Toaster />
-            <h1 className="font-bold tracking-wide text-2xl">Leave Management</h1>
+            <h1 className="font-bold tracking-wide text-3xl">Leave Management</h1>
             {/* Metrics Cards */}
-            <div className="grid grid-cols-2 md:grid-col-3 lg-grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-col-3 lg-grid-cols-4 gap-6 border border-gray-300 rounded-lg p-4">
                 {/* Total Hours Card */}
                 <Card>
                     <CardHeader>
@@ -213,7 +213,7 @@ export default function AdminLeavePage() {
                         </div>
                     </CardContent>
                 </Card>
-                {/* Upcoming Leave / Scheduled LeavePresent Card */}
+                {/* Pending Requests Card */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="Tracking-widest font-bold">Pending Requests</CardTitle>
@@ -303,7 +303,7 @@ export default function AdminLeavePage() {
                 <Input type="text" placeholder="Search Employee" value={search} onChange={(e) => setSearch(e.target.value)} className="input" />
             </div>
             {/* Attendance Table */}
-            <div className="border rounded-lg overflow-hidden">
+            <div className="border border-gray-300 rounded-lg overflow-hidden">
                 <div className="max-h-[400px] overflow-y-auto">
                     <TooltipProvider>
                         <Table>
@@ -361,9 +361,9 @@ export default function AdminLeavePage() {
                 </div>
             </div>
             {/* Charts */}
-            <div className="grid grid-cols-1 gap-4">
-                <Card>
-                    <CardHeader><CardTitle>Status Breakdown</CardTitle></CardHeader>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <Card className="border border-gray-300 shadow-sm">
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Status Breakdown</CardTitle></CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -379,8 +379,8 @@ export default function AdminLeavePage() {
                 </Card>
 
                 {/* BAR */}
-                <Card>
-                    <CardHeader><CardTitle>Monthly Leaves</CardTitle></CardHeader>
+                <Card className="border border-gray-300 shadow-sm">
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leaves</CardTitle></CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={monthlyData} margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
@@ -395,8 +395,8 @@ export default function AdminLeavePage() {
                 </Card>
 
                 {/* TOP EMPLOYEES */}
-                <Card>
-                    <CardHeader><CardTitle>Top Employees</CardTitle></CardHeader>
+                <Card className="border border-gray-300 shadow-sm">
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Top Employees</CardTitle></CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={topEmployees} layout="vertical" margin={{ left: 30 }}>
@@ -411,7 +411,7 @@ export default function AdminLeavePage() {
                 </Card>
 
                 {/* AREA CHART */}
-                <Card>
+                <Card className="border border-gray-300 shadow-sm">
                     <CardHeader><CardTitle>Monthly Leave Trend</CardTitle></CardHeader>
                     <CardContent className="h-[350px]">
                         <ResponsiveContainer width="100%" height="100%">
