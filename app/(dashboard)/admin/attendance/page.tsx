@@ -1,9 +1,9 @@
-import AdminAttendancePage from "@/components/admin/admin-attendance-page";
+import AdminLeavePage from "@/components/admin/admin-leave-page";
 
 export default function AdminPage(){
     return (
         <div>
-        <AdminAttendancePage />
+        <AdminLeavePage />
         </div>
     )
 }

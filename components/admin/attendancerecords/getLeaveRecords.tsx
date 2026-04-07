@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-export async function getAttendanceRecords(){
+export async function getLeaveRecords(){
     try{
         const response= await api.get("/leave");
         const data=response.data;
