@@ -52,19 +52,18 @@ export function AppSidebar() {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
 
-                        {/* <SidebarMenuItem>
+                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/admin/departments">
+                                <Link href="/admin/projects">
                                     <Building2 className="mr-2 h-4 w-4" />
-                                    Departments
+                                    Projects
                                 </Link>
                             </SidebarMenuButton>
-                        </SidebarMenuItem> */}
+                        </SidebarMenuItem> 
                     </SidebarMenu>
-                </SidebarGroup>
 
-                <SidebarGroup>
-                    <SidebarGroupLabel>Management</SidebarGroupLabel>
+
+
                     <SidebarMenu>
                         {/* <SidebarMenuItem>
                             <SidebarMenuButton asChild>

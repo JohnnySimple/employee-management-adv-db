@@ -301,33 +301,6 @@ await prisma.projectAssigned.createMany({
 })
 
 /**
-** SALARIES
-*/
-
-    const staticSalaries = [
-    { empId: constManager.employeeId, amount: 166400 },
-    { empId: hrManager.employeeId, amount: 156000 },
-    { empId: createdEmployees[0].employeeId, amount: 124800 }, // Alan
-    { empId: createdEmployees[1].employeeId, amount: 83200 }, // Grace
-    { empId: createdEmployees[2].employeeId, amount: 83200 }, // Ada
-    { empId: createdEmployees[3].employeeId, amount: 62400 }, // Linus
-    { empId: createdEmployees[4].employeeId, amount: 62400 },  // Margaret
-    { empId: createdEmployees[5].employeeId, amount: 62400 },  // Anita
-    { empId: createdEmployees[6].employeeId, amount: 62400 },  // John
-    { empId: createdEmployees[7].employeeId, amount: 93600 },  // Jane
-    { empId: createdEmployees[8].employeeId, amount: 93600 },  // Robert
-    { empId: createdEmployees[9].employeeId, amount: 93600 },  // Alice
-]
-
-await prisma.salary.createMany({
-    data: staticSalaries.map(s => ({
-        employeeId: s.empId,
-        salaryDate: new Date(),
-        amount: s.amount
-    }))
-})
-
-/**
  * ATTENDANCE
  */
 
@@ -356,15 +329,21 @@ const getDateXDaysAgo = (days: number) => {
 const dailyHoursByMonth = new Map<string, { reg: number, ot: number }>();
 
 // Last 2 weeks
-for (let i = 0; i < 13; i++) {
+for (let i = 1; i < 43; i++) {
     const workDate = getDateXDaysAgo(i);
     const isWeekend = workDate.getDay() === 0 || workDate.getDay() === 6;
 
     if (!isWeekend) {
         [constManager, hrManager, ...createdEmployees].forEach((emp) => {
-    const dailyVariance = Math.floor(rng() * 11) / 10;
-    const hoursWorked = 7.5 + dailyVariance;
-    const overtimeHours = (rng() > 0.8) ? 1.5 : 0;
+    let dailyVariance = Math.floor(rng() * 11) / 10;
+    let hoursWorked = 7.5 + dailyVariance;
+    let overtimeHours = (rng() > 0.8) ? 1.5 : 0;
+
+    if (hoursWorked > 8) {
+        overtimeHours = Math.round((hoursWorked - 8) * 10) / 10;
+        hoursWorked = 8;
+    }
+    
     const totalHoursForDay = hoursWorked + overtimeHours;
 
     const datePart = workDate.toISOString().split('T')[0];
@@ -439,30 +418,37 @@ await prisma.attendance.createMany({
 * EMPLOYEE LEAVE
 */
 
+const formatDate = (date: Date): string => date.toISOString().split('T')[0];
+
+const today: Date = new Date();
+const tomorrow: Date = new Date();
+tomorrow.setDate(today.getDate() + 1);
+
+// 2. Data Array
 const leaveData = [
-    { emp: constManager, start: "2026-02-10", end: "2026-02-15", hours: 40, status: "Approved" },
-    { emp: createdEmployees[0], start: "2026-01-05", end: "2026-01-10", hours: 40, status: "Approved" },
-    { emp: createdEmployees[1], start: "2026-03-12", end: "2026-03-14", hours: 24, status: "Approved" },
-    { emp: createdEmployees[4], start: "2026-02-07", end: "2026-02-08", hours: 8, status: "Approved", leaveType: sick.leaveId },
-
-    { emp: hrManager, start: "2026-06-15", end: "2026-06-20", hours: 40, status: "Approved" },
-    { emp: createdEmployees[5], start: "2026-05-20", end: "2026-05-25", hours: 40, status: "Approved" },
-
-    { emp: createdEmployees[2], start: "2026-08-10", end: "2026-08-15", hours: 40, status: "Pending" },
-    { emp: createdEmployees[6], start: "2026-09-01", end: "2026-09-03", hours: 16, status: "Pending" },
-
-    { emp: createdEmployees[3], start: "2026-04-20", end: "2026-04-25", hours: 40, status: "Rejected" },
-    { emp: createdEmployees[8], start: "2026-12-24", end: "2026-12-31", hours: 48, status: "Rejected" },
+    { emp: constManager, start: "2026-02-10", end: "2026-02-15", hours: 40, status: "Approved", type: pto.leaveId },
+    { emp: createdEmployees[0], start: "2026-01-05", end: "2026-01-10", hours: 40, status: "Approved", type: pto.leaveId },
+    { emp: createdEmployees[1], start: "2026-03-12", end: "2026-03-14", hours: 24, status: "Approved", type: pto.leaveId },
+    { emp: createdEmployees[4], start: "2026-02-07", end: "2026-02-08", hours: 8, status: "Approved", type: sick.leaveId },
+    { emp: hrManager, start: "2026-06-15", end: "2026-06-20", hours: 40, status: "Approved", type: pto.leaveId },
+    { emp: createdEmployees[5], start: "2026-05-20", end: "2026-05-25", hours: 40, status: "Approved", type: pto.leaveId },
+    { emp: createdEmployees[2], start: "2026-08-10", end: "2026-08-13", hours: 24, status: "Pending", type: pto.leaveId },
+    { emp: createdEmployees[6], start: "2026-09-01", end: "2026-09-03", hours: 16, status: "Pending", type: pto.leaveId },
+    { emp: createdEmployees[3], start: "2026-04-20", end: "2026-04-25", hours: 40, status: "Rejected", type: pto.leaveId },
+    { emp: createdEmployees[8], start: "2026-12-24", end: "2026-12-31", hours: 48, status: "Rejected", type: pto.leaveId },
+    { emp: createdEmployees[9], start: formatDate(today), end: formatDate(tomorrow), hours: 16, status: "Approved", type: pto.leaveId },
+    { emp: createdEmployees[7], start: "2026-07-01", end: "2026-07-02", hours: 8, status: "Approved", type: sick.leaveId },
 ];
 
+// 3. Logic Loop
 for (const leave of leaveData) {
-    
     const hoursToDeduct = leave.status === "Approved" ? leave.hours : 0;
+    const currentLeaveId = leave.type ?? pto.leaveId;
 
     const empLeave = await prisma.employeeLeave.create({
         data: {
             employeeId: leave.emp.employeeId,
-            leaveId: pto.leaveId,
+            leaveId: currentLeaveId,
             totalLeaveHours: 80,
             totalRemaining: 80 - hoursToDeduct,
             status: leave.status 
@@ -478,7 +464,73 @@ for (const leave of leaveData) {
             status: leave.status
         }
     });
-}}
+}
+
+/**
+** SALARIES
+*/
+
+    /**
+** MONTHLY SALARY PROCESSING (Run on the 23rd of each month)
+*/
+
+// 1. Map Job Titles to their pay rates for easy lookup
+// We use a Map for O(1) performance during the loop
+const jobTitleRates = new Map([
+    [constructionIntro.jobTitleId, constructionIntro.payRate],
+    [constructionJunior.jobTitleId, constructionJunior.payRate],
+    [constructionSenior.jobTitleId, constructionSenior.payRate],
+    [constructionManager.jobTitleId, constructionManager.payRate],
+    [resourceManager.jobTitleId, resourceManager.payRate],
+    [hrTitle.jobTitleId, hrTitle.payRate],
+]);
+
+const salaryRecords: any[] = [];
+const allEmployees = [constManager, hrManager, ...createdEmployees];
+
+allEmployees.forEach(emp => {
+    // 2. Group the attendanceRecords by Month/Year for THIS employee
+    const monthlyBundles: { [key: string]: { reg: number, ot: number } } = {};
+
+    attendanceRecords
+        .filter(record => record.employeeId === emp.employeeId)
+        .forEach(record => {
+            const date = new Date(record.workDate);
+            const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`; // e.g., "2026-2"
+
+            if (!monthlyBundles[monthYear]) {
+                monthlyBundles[monthYear] = { reg: 0, ot: 0 };
+            }
+            monthlyBundles[monthYear].reg += record.hoursWorked;
+            monthlyBundles[monthYear].ot += record.overtimeHours;
+        });
+
+    // 3. Calculate pay for each month found
+    Object.keys(monthlyBundles).forEach(monthYear => {
+        const [year, month] = monthYear.split('-').map(Number);
+        const hourlyRate = jobTitleRates.get(emp.jobTitleId) || 0;
+        
+        const regPay = monthlyBundles[monthYear].reg * hourlyRate;
+        const otPay = monthlyBundles[monthYear].ot * (hourlyRate * 1.5);
+        const totalMonthlyPay = Math.round((regPay + otPay) * 100) / 100;
+
+        salaryRecords.push({
+            employeeId: emp.employeeId,
+            // Set salary date to the 23rd of that specific month
+            salaryDate: new Date(year, month - 1, 23),
+            amount: totalMonthlyPay
+        });
+    });
+});
+
+salaryRecords.sort((a, b) => a.salaryDate.getTime() - b.salaryDate.getTime());
+
+// 4. Bulk Insert into Database
+await prisma.salary.createMany({
+    data: salaryRecords
+});
+}
+
 
 main()
     .then(async () => {

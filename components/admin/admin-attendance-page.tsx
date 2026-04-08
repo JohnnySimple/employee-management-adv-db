@@ -142,7 +142,7 @@ async function updateStatus(leaveDate: number, status: string) {
     }));
 
     const otData = [
-        { name: "Hours Off", value: totalHoursOff },
+        { name: "Hours Off", value: totalHoursOff.toFixed(2) },
         { name: "Working Hours (Est)", value: leaveData.length * 8 },
     ];
 
