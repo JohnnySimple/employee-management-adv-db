@@ -4,13 +4,8 @@ import {
     YAxis,
     Tooltip as ReTooltip,
     ResponsiveContainer,
-    PieChart,
     BarChart,
     Bar,
-    Pie,
-    Cell,
-    AreaChart,
-    Area,
     CartesianGrid,
     Legend
 } from "recharts";
@@ -25,7 +20,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Clock, UserCheck, AlertCircle, Edit2, Loader, User, Calendar } from "lucide-react";
+import { UserCheck, Edit2, Loader, User, Calendar } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuTrigger,
@@ -48,14 +43,6 @@ interface LeaveRecord {
     endDate: string,
     hoursOff: number,
     leaveDateStatus: string;
-}
-
-
-interface MonthlyStatus {
-    name: string;
-    Approved: number;
-    Pending: number;
-    Rejected: number;
 }
 
 const COLORS = {
@@ -153,7 +140,7 @@ export default function AdminLeavePage() {
     // Employees on Leave Today
     const onLeaveToday = leaveData.filter((r) => new Date(r.startDate) <= today && new Date(r.endDate) >= today).length;
     const totalHoursOff = leaveData.reduce((sum, r) => sum + (r.hoursOff || 0), 0);
-    const avgHoursOff = leaveData.length ? (totalHoursOff / leaveData.length).toFixed(1) : 0;
+    // const avgHoursOff = leaveData.length ? (totalHoursOff / leaveData.length).toFixed(1) : 0;
 
     // Leave Type Map
     const typeMap: Record<string, number> = {};
@@ -162,12 +149,12 @@ export default function AdminLeavePage() {
     });
 
     // find the most common leave type
-    const mostCommonLeaveType = Object.entries(typeMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
+    // const mostCommonLeaveType = Object.entries(typeMap).sort((a, b) => b[1] - a[1])[0]?.[0] || "N/A";
 
-    const leaveTypeData = Object.entries(typeMap).map(([name, value]) => ({
-        name,
-        value
-    }));
+    // const leaveTypeData = Object.entries(typeMap).map(([name, value]) => ({
+    //     name,
+    //     value
+    // }));
 
     // Status Pie Chart Data
     // const statusData = [
@@ -247,7 +234,7 @@ export default function AdminLeavePage() {
             {/* Metrics Cards */}
             <div className="grid grid-cols-2 md:grid-col-3 lg-grid-cols-4 gap-6 border border-gray-300 rounded-lg p-4">
                 {/* Total Hours Card */}
-                <Card>
+                {/* <Card>
                     <CardHeader>
                         <CardTitle className="tracking-widest font-bold">Total Leave Hours</CardTitle>
                     </CardHeader>
@@ -257,7 +244,7 @@ export default function AdminLeavePage() {
                             <span className="text-2xl font-bold">{totalHoursOff} hrs</span>
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
                 {/* Pending Requests Card */}
                 <Card>
                     <CardHeader>
@@ -271,7 +258,7 @@ export default function AdminLeavePage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                {/* <Card>
                     <CardHeader>
                         <CardTitle className="Tracking-widest font-bold">Rejected Leave Requests</CardTitle>
                     </CardHeader>
@@ -281,7 +268,7 @@ export default function AdminLeavePage() {
                             <span className="tracking-wide text-xl font-bold">{rejectedCount}</span>
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
                 {/* Appproved Leaves Count */}
                 <Card>
                     <CardHeader>
@@ -344,7 +331,7 @@ export default function AdminLeavePage() {
                 </Card> */}
             </div>
             {/* Search Filters */}
-            <div className="w-full">
+            <div className="w-full border border-gray-300 rounded-lg p-4 flex items-center gap-4">
                 <Input type="text" placeholder="Search Employee" value={search} onChange={(e) => setSearch(e.target.value)} className="input" />
             </div>
             {/* Attendance Table */}
@@ -408,8 +395,8 @@ export default function AdminLeavePage() {
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                  {/* Monthly Leave Type */}
-                <Card>
-                    <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Breakdown by Type</CardTitle></CardHeader>
+                <Card className="border border-gray-300 rounded-md">
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Breakdown by Leave Type</CardTitle></CardHeader>
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={monthlyTypeData}>
@@ -427,7 +414,7 @@ export default function AdminLeavePage() {
                 </Card>
 
                 {/* Merged Top Employees & Duration */}
-                <Card>
+                <Card className="border border-gray-300 rounded-md">
                     <CardHeader><CardTitle className="tracking-widest font-bold">Top Employees & Leave Duration</CardTitle></CardHeader>
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
