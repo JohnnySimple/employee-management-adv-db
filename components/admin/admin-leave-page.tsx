@@ -60,6 +60,10 @@ const COLORS = {
     ]
 };
 
+const COLORS1= {
+    barPalette: ["#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"],
+};
+
 
 export default function AdminLeavePage() {
     const [search, setSearch] = useState("");
@@ -67,6 +71,9 @@ export default function AdminLeavePage() {
     const [loading, setLoading] = useState(false);
 
     const [updatingId, setUpdatingId] = useState<number | null>(null);
+
+    const [monthSearch, setMonthSearch] = useState("");
+    const [employeeSearch, setEmployeeSearch] = useState("");
 
     async function updateStatus(leaveDate: number, status: string) {
         try {
@@ -172,10 +179,13 @@ export default function AdminLeavePage() {
 
         monthlyTypeMap[month][r.leaveType]++;
     });
-    const monthlyTypeData = Object.keys(monthlyTypeMap).map(month => ({
+    let monthlyTypeData = Object.keys(monthlyTypeMap).map(month => ({
         name: month,
         ...monthlyTypeMap[month]
     }));
+      if (monthSearch) {
+        monthlyTypeData = monthlyTypeData.filter((m) => m.name.toLowerCase().includes(monthSearch.toLowerCase()));
+    }
 
     const leaveTypes = Object.keys(typeMap);
     // const monthlyMap: Record<string, number> = {};
@@ -195,10 +205,13 @@ export default function AdminLeavePage() {
         empMap[r.employeeName] = (empMap[r.employeeName] || 0) + r.hoursOff;
     });
 
-    const topEmployees = Object.keys(empMap)
+    let topEmployees = Object.keys(empMap)
         .map(key => ({ name: key, value: empMap[key] }))
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
+     if (employeeSearch) {
+         topEmployees = topEmployees.filter((e) => e.name.toLowerCase().includes(employeeSearch.toLowerCase()));
+    }
 
     // Leave Duration Distribution
     const durationMap: Record<string, number> = {};
@@ -398,6 +411,10 @@ export default function AdminLeavePage() {
                 <Card className="border border-gray-300 rounded-md">
                     <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Distribution</CardTitle>
                     <p className="tracking-wide text-gray-500">Leave type breakdown per month data</p>
+                    <div className="mt-2 flex items-center gap-2">
+                        <Input placeholder="Filter by month" value={monthSearch} onChange={(e) => setMonthSearch(e.target.value)} className="input" />
+                            {monthSearch && <Button size="sm" onClick={() => setMonthSearch("")}>Clear</Button>}
+                    </div>
                     </CardHeader>
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
@@ -408,7 +425,7 @@ export default function AdminLeavePage() {
                                 <ReTooltip />
                                 <Legend />
                                 {leaveTypes.map((type, idx) => (
-                                    <Bar key={type} dataKey={type} stackId="a" fill={COLORS.barPalette[idx % COLORS.barPalette.length]} />
+                                    <Bar key={type} dataKey={type} stackId="a" fill={COLORS1.barPalette[idx % COLORS.barPalette.length]} />
                                 ))}
                             </BarChart>
                         </ResponsiveContainer>
@@ -419,6 +436,10 @@ export default function AdminLeavePage() {
                 <Card className="border border-gray-300 rounded-md">
                     <CardHeader><CardTitle className="tracking-widest font-bold">Top Employee Leave Distribution</CardTitle>
                     <p className="tracking-wide text-gray-500">Top employees leave duration data</p>
+                    <div className="mt-2 flex items-center gap-2">
+                        <Input placeholder="Filter by employee" value={employeeSearch} onChange={(e) => setEmployeeSearch(e.target.value)} className="input" />
+                        {employeeSearch && <Button size="sm" value={employeeSearch} onClick={()=> setEmployeeSearch("")}>Clear</Button>}
+                    </div>
                     </CardHeader>
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
