@@ -59,15 +59,18 @@ interface MonthlyStatus {
 }
 
 const COLORS = {
-   approved: "#22c55e", // green
-    pending: "#f59e0b",  // yellow
-    rejected: "#ef4444", // red
-    primary: "#6366f1",  // indigo
-    secondary: "#3b82f6", // blue
-    gradientStart: "#6366f1",
-    gradientEnd: "#a5b4fc",
-    pieColors: ["#6366f1", "#3b82f6", "#22c55e", "#f59e0b", "#ef4444"]
+    primary: "#18181b",
+    secondary: "#3f3f46",
+    tertiary: "#71717a",
+    light: "#d4d4d8",
 
+    barPalette: [
+        "#18181b",
+        "#27272a",
+        "#3f3f46",
+        "#52525b",
+        "#71717a"
+    ]
 };
 
 
@@ -152,7 +155,7 @@ export default function AdminLeavePage() {
     const totalHoursOff = leaveData.reduce((sum, r) => sum + (r.hoursOff || 0), 0);
     const avgHoursOff = leaveData.length ? (totalHoursOff / leaveData.length).toFixed(1) : 0;
 
-    // Most common Leave Type
+    // Leave Type Map
     const typeMap: Record<string, number> = {};
     leaveData.forEach((r) => {
         typeMap[r.leaveType] = (typeMap[r.leaveType] || 0) + 1;
@@ -167,23 +170,37 @@ export default function AdminLeavePage() {
     }));
 
     // Status Pie Chart Data
-    const statusData = [
-        { name: "Approved", value: approvedCount },
-        { name: "Pending", value: pendingCount },
-        { name: "Rejected", value: rejectedCount }
-    ];
+    // const statusData = [
+    //     { name: "Approved", value: approvedCount },
+    //     { name: "Pending", value: pendingCount },
+    //     { name: "Rejected", value: rejectedCount }
+    // ];
 
     // Monthly Leave Trends (Leaves per month)
-    const monthlyMap: Record<string, number> = {};
+    const monthlyTypeMap: Record<string, Record<string, number>> = {};
     leaveData.forEach((r) => {
         const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
-        monthlyMap[month] = (monthlyMap[month] || 0) + 1;
-    })
+        if (!monthlyTypeMap[month]) monthlyTypeMap[month] = {};
+        if (!monthlyTypeMap[month][r.leaveType]) monthlyTypeMap[month][r.leaveType] = 0;
 
-    const monthlyData = Object.keys(monthlyMap).map(key => ({
-        name: key,
-        value: monthlyMap[key]
+        monthlyTypeMap[month][r.leaveType]++;
+    });
+    const monthlyTypeData = Object.keys(monthlyTypeMap).map(month => ({
+        name: month,
+        ...monthlyTypeMap[month]
     }));
+
+    const leaveTypes = Object.keys(typeMap);
+    // const monthlyMap: Record<string, number> = {};
+    // leaveData.forEach((r) => {
+    //     const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
+    //     monthlyMap[month] = (monthlyMap[month] || 0) + 1;
+    // })
+
+    // const monthlyData = Object.keys(monthlyMap).map(key => ({
+    //     name: key,
+    //     value: monthlyMap[key]
+    // }));
 
     // Top Employees with most leaves
     const empMap: Record<string, number> = {};
@@ -196,21 +213,19 @@ export default function AdminLeavePage() {
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
 
-    const monthlyStatusMap: Record<string, MonthlyStatus> = {};
-  leaveData.forEach((r) => {
-    const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
-    if (!monthlyStatusMap[month]) monthlyStatusMap[month] = { name: month, Approved: 0, Pending: 0, Rejected: 0 };
-    monthlyStatusMap[month][r.leaveDateStatus]++;
-  });
-  const monthlyStatusData = Object.values(monthlyStatusMap);
+    // Leave Duration Distribution
+    const durationMap: Record<string, number> = {};
+    leaveData.forEach((r) => {
+        const bucket = r.hoursOff <= 4 ? '0-4' : r.hoursOff <= 8 ? '4-8' : r.hoursOff <= 16 ? '8-16' : '16+';
+        durationMap[bucket] = (durationMap[bucket] || 0) + 1;
+    });
+    const durationData = Object.entries(durationMap).map(([bucket, count]) => ({ bucket, count }));
 
-  // Leave Duration Distribution
-  const durationMap: Record<string, number> = {};
-  leaveData.forEach((r) => {
-    const bucket = r.hoursOff <= 4 ? '0-4' : r.hoursOff <= 8 ? '4-8' : r.hoursOff <= 16 ? '8-16' : '16+';
-    durationMap[bucket] = (durationMap[bucket] || 0) + 1;
-  });
-  const durationData = Object.entries(durationMap).map(([name, value]) => ({ name, value }));
+    const mergedChartData = topEmployees.map((emp, idx) => ({
+        name: emp.name,
+        hoursOff: emp.value,
+        LeaveDuration: durationData[idx]?.count || 0
+    }));
 
     const filteredData = leaveData.filter((row) =>
         row.employeeName.toLowerCase().includes(search.toLowerCase())
@@ -303,7 +318,7 @@ export default function AdminLeavePage() {
                         </div>
                     </CardContent>
                 </Card>
-                {/* Average Hours Off */}
+                {/* Average Hours Off
                 <Card>
                     <CardHeader>
                         <CardTitle className="tracking-widest font-bold">Average Hours Off</CardTitle>
@@ -314,8 +329,8 @@ export default function AdminLeavePage() {
                             <span className="tracking-wide text-xl font-bold">{avgHoursOff}</span>
                         </div>
                     </CardContent>
-                </Card>
-                {/* Most Common Leave Type */}
+                </Card> */}
+                {/* Most Common Leave Type
                 <Card>
                     <CardHeader>
                         <CardTitle className="tracking-widest font-bold">Most Common Leave Type</CardTitle>
@@ -326,7 +341,7 @@ export default function AdminLeavePage() {
                             <span className="tracking-wide text-xl font-bold">{mostCommonLeaveType}</span>
                         </div>
                     </CardContent>
-                </Card>
+                </Card> */}
             </div>
             {/* Search Filters */}
             <div className="w-full">
@@ -334,7 +349,7 @@ export default function AdminLeavePage() {
             </div>
             {/* Attendance Table */}
             <div className="border border-gray-300 rounded-lg overflow-hidden">
-                <div className="max-h-[400px] overflow-y-auto">
+                <div className="max-h-100 overflow-y-auto">
                     <TooltipProvider>
                         <Table>
                             <TableHeader>
@@ -392,131 +407,43 @@ export default function AdminLeavePage() {
             </div>
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-               <Card className="border border-gray-300 shadow-sm">
-          <CardHeader><CardTitle className="tracking-widest font-bold">Leave Type Distribution</CardTitle></CardHeader>
-          <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={leaveTypeData}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={120}
-                  innerRadius={60}
-                  paddingAngle={5}
-                  cornerRadius={8}
-                >
-                  {leaveTypeData.map((_, idx) => <Cell key={idx} fill={COLORS.pieColors[idx % COLORS.pieColors.length]} />)}
-                </Pie>
-                <ReTooltip />
-                <Legend verticalAlign="bottom" />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+                 {/* Monthly Leave Type */}
+                <Card>
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Breakdown by Type</CardTitle></CardHeader>
+                    <CardContent className="h-72">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={monthlyTypeData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis />
+                                <ReTooltip />
+                                <Legend />
+                                {leaveTypes.map((type, idx) => (
+                                    <Bar key={type} dataKey={type} stackId="a" fill={COLORS.barPalette[idx % COLORS.barPalette.length]} />
+                                ))}
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
 
-        {/* Monthly Leaves BarChart */}
-        <Card className="border border-gray-300 shadow-sm">
-          <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leaves</CardTitle></CardHeader>
-          <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData} margin={{ top: 20, right: 20, bottom: 20, left: -10 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <ReTooltip />
-                <Bar dataKey="value" fill={COLORS.primary} radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Top Employees BarChart */}
-        <Card className="border border-gray-300 shadow-sm">
-          <CardHeader><CardTitle className="tracking-widest font-bold">Top Employees</CardTitle></CardHeader>
-          <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={topEmployees} layout="vertical" margin={{ left: 30 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis type="category" dataKey="name" />
-                <ReTooltip />
-                <Bar dataKey="value" fill={COLORS.secondary} radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Monthly Leave Trend AreaChart */}
-        <Card className="border border-gray-300 shadow-sm">
-          <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Trend</CardTitle></CardHeader>
-          <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                <defs>
-                  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.gradientStart} stopOpacity={0.8} />
-                    <stop offset="95%" stopColor={COLORS.gradientEnd} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <ReTooltip />
-                <Area type="monotone" dataKey="value" stroke={COLORS.primary} fill="url(#colorValue)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Status Trend AreaChart */}
-        <Card className="border border-gray-300 shadow-sm">
-          <CardHeader><CardTitle className="tracking-widest font-bold">Status Trend Over Months</CardTitle></CardHeader>
-          <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyStatusData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                <defs>
-                  <linearGradient id="gradApproved" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.approved} stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor={COLORS.approved} stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="gradPending" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.pending} stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor={COLORS.pending} stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="gradRejected" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.rejected} stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor={COLORS.rejected} stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <ReTooltip />
-                <Area type="monotone" dataKey="Approved" stackId="1" stroke={COLORS.approved} fill="url(#gradApproved)" />
-                <Area type="monotone" dataKey="Pending" stackId="1" stroke={COLORS.pending} fill="url(#gradPending)" />
-                <Area type="monotone" dataKey="Rejected" stackId="1" stroke={COLORS.rejected} fill="url(#gradRejected)" />
-                <Legend verticalAlign="bottom"/>
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        {/* Leave Duration Histogram */}
-        <Card className="border border-gray-300 shadow-sm">
-          <CardHeader><CardTitle className="tracking-widest font-bold">Leave Duration Distribution (hrs)</CardTitle></CardHeader>
-          <CardContent className="h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={durationData} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                <CartesianGrid strokeDasharray="3 3"/>
-                <XAxis dataKey="name"/>
-                <YAxis/>
-                <ReTooltip/>
-                <Bar dataKey="value" fill={COLORS.secondary} radius={[4,4,0,0]}/>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+                {/* Merged Top Employees & Duration */}
+                <Card>
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Top Employees & Leave Duration</CardTitle></CardHeader>
+                    <CardContent className="h-72">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={mergedChartData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="name" />
+                                <YAxis yAxisId="left" orientation="left" />
+                                <YAxis yAxisId="right" orientation="right" />
+                                <ReTooltip />
+                                <Legend />
+                                <Bar yAxisId="left" dataKey="hoursOff" fill={COLORS.barPalette[0]} name="Hours Off" />
+                                <Bar yAxisId="right" dataKey="LeaveDuration" fill={COLORS.barPalette[1]} name="Leave Duration" />
+                            </BarChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     )
