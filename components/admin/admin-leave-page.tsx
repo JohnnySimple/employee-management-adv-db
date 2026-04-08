@@ -134,12 +134,12 @@ export default function AdminLeavePage() {
     const today = new Date();
     const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
-    const rejectedCount = leaveData.filter((r) => r.leaveDateStatus === "Rejected").length;
+    // const rejectedCount = leaveData.filter((r) => r.leaveDateStatus === "Rejected").length;
     //Upcoming Leaves
     const upcomingLeaves = leaveData.filter((r) => r.leaveDateStatus === "Approved" && new Date(r.startDate) > today).length;
     // Employees on Leave Today
     const onLeaveToday = leaveData.filter((r) => new Date(r.startDate) <= today && new Date(r.endDate) >= today).length;
-    const totalHoursOff = leaveData.reduce((sum, r) => sum + (r.hoursOff || 0), 0);
+    // const totalHoursOff = leaveData.reduce((sum, r) => sum + (r.hoursOff || 0), 0);
     // const avgHoursOff = leaveData.length ? (totalHoursOff / leaveData.length).toFixed(1) : 0;
 
     // Leave Type Map
@@ -232,7 +232,7 @@ export default function AdminLeavePage() {
             <Toaster />
             <h1 className="font-bold tracking-wide text-3xl">Leave Management</h1>
             {/* Metrics Cards */}
-            <div className="grid grid-cols-2 md:grid-col-3 lg-grid-cols-4 gap-6 border border-gray-300 rounded-lg p-4">
+            <div className="grid grid-cols-4 md:grid-col-3 lg-grid-cols-4 gap-6 border border-gray-300 rounded-lg p-4">
                 {/* Total Hours Card */}
                 {/* <Card>
                     <CardHeader>
@@ -396,7 +396,9 @@ export default function AdminLeavePage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                  {/* Monthly Leave Type */}
                 <Card className="border border-gray-300 rounded-md">
-                    <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Breakdown by Leave Type</CardTitle></CardHeader>
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Distribution</CardTitle>
+                    <p className="tracking-wide text-gray-500">Leave type breakdown per month data</p>
+                    </CardHeader>
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={monthlyTypeData}>
@@ -415,7 +417,9 @@ export default function AdminLeavePage() {
 
                 {/* Merged Top Employees & Duration */}
                 <Card className="border border-gray-300 rounded-md">
-                    <CardHeader><CardTitle className="tracking-widest font-bold">Top Employees & Leave Duration</CardTitle></CardHeader>
+                    <CardHeader><CardTitle className="tracking-widest font-bold">Top Employee Leave Distribution</CardTitle>
+                    <p className="tracking-wide text-gray-500">Top employees leave duration data</p>
+                    </CardHeader>
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={mergedChartData}>
