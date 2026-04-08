@@ -76,13 +76,35 @@ export async function POST(req:Request){
             }
         const location = data.location.trim();
 
+        const status =
+    data.status !== undefined
+        ? typeof data.status === "string"
+            ? data.status.trim()
+            : null
+        : undefined;
+
+        if (status === null) {
+            return NextResponse.json({ error: "status must be a string" }, { status: 400 });
+        }
+
+        if (status === undefined) {
+            return NextResponse.json({ error: "status is required" }, { status: 400 });
+        }
+
+        if (!["ACTIVE", "INACTIVE"].includes(status)) {
+            return NextResponse.json(
+                { error: "status must be one of the following: ACTIVE, INACTIVE" }, 
+                { status: 400 }
+            );
+        }
 
         const newProject = await prisma.project.create({
             data: {
                 projectName,
                 startDate,
                 endDate,
-                location
+                location,
+                status
             }
         });
 

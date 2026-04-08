@@ -105,7 +105,7 @@ export default function AdminPayroll() {
   const [filterError, setFilterError] = useState("");
   const [filterLoading, setFilterLoading] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [averageSalary, setAverageSalary] = useState(0);
+  const [totalSalary, setTotalSalary] = useState(0);
   const [totalHoursThisMonth, setTotalHoursThisMonth] = useState(0);
   const [overtimeHours, setOvertimeHours] = useState(0);
   const [totalPayrollMonth, setTotalPayrollMonth] = useState(0);
@@ -135,7 +135,7 @@ export default function AdminPayroll() {
 
     const totalAmount = salary.reduce((sum, item) => sum + item.amount, 0);
 
-    setAverageSalary(Math.round(totalAmount / salary.length));
+    setTotalSalary(Math.round(totalAmount)) ;
 
     const now = new Date();
     const currentMonth = now.getMonth(); 
@@ -406,7 +406,7 @@ const handleClear = () => {
               <Clock className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{overtimeHours}</div>
+              <div className="text-2xl font-bold">{overtimeHours.toFixed(2)}h</div>
               <p className="text-xs text-muted-foreground">Current month to date</p>
             </CardContent>
           </Card>
@@ -415,11 +415,11 @@ const handleClear = () => {
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-medium">Avg. Annual Salary</CardTitle>
+              <CardTitle className="text-sm font-medium">Estimated Annual Payroll</CardTitle>
               <DollarSign className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${averageSalary.toLocaleString()}</div>
+              <div className="text-2xl font-bold">${totalSalary.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">For all employees</p>
             </CardContent>
           </Card>

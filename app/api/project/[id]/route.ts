@@ -111,13 +111,36 @@ export async function PATCH(req: Request, context: { params: { id: string } } ){
             return NextResponse.json({ error: "startDate must be before endDate" }, { status: 400 });
         }
 
+        const status =
+    data.status !== undefined
+        ? typeof data.status === "string"
+            ? data.status.trim()
+            : null
+        : undefined;
+
+        if (status === null) {
+            return NextResponse.json({ error: "status must be a string" }, { status: 400 });
+        }
+
+        if (status === undefined) {
+            return NextResponse.json({ error: "status is required" }, { status: 400 });
+        }
+
+        if (!["ACTIVE", "INACTIVE"].includes(status)) {
+            return NextResponse.json(
+                { error: "status must be one of the following: ACTIVE, INACTIVE" }, 
+                { status: 400 }
+            );
+        }
+
         const updatedProject = await prisma.project.update({
             where: { projectId },
             data: {
                 projectName,       
                 startDate,
                 endDate,
-                location   
+                location, 
+                status
             }
         });
 
