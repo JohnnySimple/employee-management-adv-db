@@ -43,10 +43,6 @@ export function EmployeeSidebar() {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
-                </SidebarGroup>
-
-                <SidebarGroup>
-                    <SidebarGroupLabel>Management</SidebarGroupLabel>
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
@@ -91,14 +87,14 @@ export function EmployeeSidebar() {
             </SidebarContent>
             <SidebarFooter>
                 <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton asChild>
+                    {/*<SidebarMenuItem>
+                         <SidebarMenuButton asChild>
                             <Link href="/employee/settings">
                                 <Settings className="mr-2 h-4 w-4" />
                                 Settings
                             </Link>
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem> */}
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <button onClick={handleLogout}>

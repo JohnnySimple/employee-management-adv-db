@@ -76,13 +76,40 @@ export async function POST(req:Request){
             }
         const location = data.location.trim();
 
+        const status =
+    data.status !== undefined
+        ? typeof data.status === "string"
+            ? data.status.trim()
+            : null
+        : undefined;
+
+        // 1. Type validation
+        if (status === null) {
+            return NextResponse.json({ error: "status must be a string" }, { status: 400 });
+        }
+
+        // 2. Required field validation (Optional: remove if status can be empty)
+        if (status === undefined) {
+            return NextResponse.json({ error: "status is required" }, { status: 400 });
+        }
+
+        // 3. ENUM validation
+        // Note: We don't use .toUpperCase() here because Enums are case-sensitive.
+        // If your Enum is ACTIVE/INACTIVE, the input must match exactly.
+        if (!["ACTIVE", "INACTIVE"].includes(status)) {
+            return NextResponse.json(
+                { error: "status must be one of the following: ACTIVE, INACTIVE" }, 
+                { status: 400 }
+            );
+        }
 
         const newProject = await prisma.project.create({
             data: {
                 projectName,
                 startDate,
                 endDate,
-                location
+                location,
+                status
             }
         });
 
