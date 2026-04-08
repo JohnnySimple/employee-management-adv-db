@@ -60,7 +60,6 @@ export default function ProjectPage() {
 
     return (
         <>
-            {/* Header outside the card so the border only wraps the table */}
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Projects</h1>
                 <button
