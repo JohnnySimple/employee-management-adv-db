@@ -14,6 +14,7 @@ export default function EmployeeLeave() {
 
     const [leaveHistory, setLeaveHistory] = useState(null);
     const [leaveTypes, setLeaveTypes] = useState(null);
+    const [leaveStats, setLeaveStats] = useState(null);
     const [openApplyForLeaveModal, setOpenApplyForLeaveModal] = useState(false);
 
     useEffect(() => {
@@ -42,6 +43,21 @@ export default function EmployeeLeave() {
         fetchLeaveTypes();
     }, [])
 
+    useEffect(() => {
+
+        const fetchLeaveStats = async () => {
+            try {
+                const response = await api.get(`/leaveemp/stats`);
+                setLeaveStats(response.data);
+                console.log(response.data);
+            } catch (error) {
+                console.error("Error fetching leave stats:", error);
+            }
+        };
+
+        fetchLeaveStats();
+    }, []);
+
 
     return (
         <div className="p-6 space-y-6">
@@ -55,7 +71,7 @@ export default function EmployeeLeave() {
                 </div>
             </div>
             <div className="flex flex-wrap gap-4 mb-6">
-                <div className="w-full sm:w-[48%] lg:w-[23%]">
+                <div className="w-full sm:w-[48%] lg:w-[49%]">
                     <Card className="flex-1 rounded-sm">
                         <CardContent className="p-0">
                         <div className="px-2 flex flex-row items-center justify-between">
@@ -64,12 +80,14 @@ export default function EmployeeLeave() {
                         </div>
                         <hr className="my-2 border-slate-200 dark:border-slate-800" />
                         <div className="px-2">
-                            <p className="text-xl font-bold text-muted-foreground">5/14 days used</p>
+                            <p className="text-xl font-bold text-muted-foreground">
+                                {leaveStats ? `${leaveStats.stats["PTO"]?.usedHours || 0}/${leaveStats.stats["PTO"]?.remaining + leaveStats.stats["PTO"]?.usedHours || 0} hours used` : "Loading..."}
+                            </p>
                         </div>
                         </CardContent>
                     </Card>
                 </div>
-                <div className="w-full sm:w-[48%] lg:w-[23%]">
+                <div className="w-full sm:w-[48%] lg:w-[49%]">
                     <Card className="flex-1 rounded-sm">
                         <CardContent className="p-0">
                         <div className="px-2 flex flex-row items-center justify-between">
@@ -78,7 +96,9 @@ export default function EmployeeLeave() {
                         </div>
                         <hr className="my-2 border-slate-200 dark:border-slate-800" />
                         <div className="px-2">
-                            <p className="text-xl font-bold text-muted-foreground">3/10 days used</p>
+                            <p className="text-xl font-bold text-muted-foreground">
+                                {leaveStats ? `${leaveStats.stats["Sick"]?.usedHours || 0}/${leaveStats.stats["Sick"]?.remaining + leaveStats.stats["Sick"]?.usedHours || 80} hours used` : "Loading..."}
+                            </p>
                         </div>
                         </CardContent>
                     </Card>

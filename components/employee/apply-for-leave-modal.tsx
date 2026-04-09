@@ -59,7 +59,11 @@ export default function ApplyForLeaveModal({ open, setOpen, leaveTypes }) {
             
         } catch (error) {
             console.error("Error applying for leave:", error);
-            toast.error("Failed to apply for leave.");
+            if (error.response && error.response.data && error.response.data.error) {
+                toast.error(`Failed to apply for leave: ${error.response.data.error?.message || "Unknown error"}`);
+            } else {
+                toast.error("Failed to apply for leave due to an unexpected error.");
+            }
         }
     }
 
@@ -111,7 +115,7 @@ export default function ApplyForLeaveModal({ open, setOpen, leaveTypes }) {
                                             value={field.value?.toString()}
                                         >
                                         <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Select job title"/>
+                                            <SelectValue placeholder="Select leave type"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             {leaveTypes?.map((leave) => (
