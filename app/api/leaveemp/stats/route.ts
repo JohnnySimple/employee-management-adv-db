@@ -19,14 +19,26 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
             }
         })
 
-        const stats = leaveStats.map(el => {
-            const used = el.leaveDates.filter(ld => ld.status === "Approved").reduce((sum, ld) => sum + ld.hoursOff, 0);
-            return {
-                leaveType: el.leave.leaveType,
+        // const stats = leaveStats.map(el => {
+        //     const used = el.leaveDates.filter(ld => ld.status === "Approved").reduce((sum, ld) => sum + ld.hoursOff, 0);
+        //     return {
+        //         leaveType: el.leave.leaveType,
+        //         usedHours: used,
+        //         remaining: el.totalLeaveHours -  used
+        //     }
+        // })
+
+        const stats = leaveStats.reduce((acc, el) => {
+            const used = el.leaveDates.filter(ld => ld.status).reduce((sum, ld) => sum + ld.hoursOff, 0);
+
+            acc[el.leave.leaveType] = {
                 usedHours: used,
-                remaining: el.totalLeaveHours -  used
-            }
-        })
+                remaining: el.totalLeaveHours - used
+            };
+
+            return acc;
+        }, {})
+
 
         return NextResponse.json({
             "stats": stats
