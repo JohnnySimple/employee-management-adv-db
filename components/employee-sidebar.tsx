@@ -15,6 +15,7 @@ import {
 import { Building2, Clock, DollarSign, FileText, LayoutDashboard, LogOut, Settings, TreePalm, Shield, Users, User } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import {getLinkClasses}  from "@/components/admin/getLinkClasses/getLinkClasses";
 
 export function EmployeeSidebar() {
 
@@ -36,7 +37,7 @@ export function EmployeeSidebar() {
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/employee">
+                                <Link href="/employee" className={getLinkClasses("/employee")}>
                                     <LayoutDashboard className="mr-2 h-4 w-4" />
                                     Dashboard
                                 </Link>
@@ -46,7 +47,7 @@ export function EmployeeSidebar() {
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/employee/attendance">
+                                <Link href="/employee/attendance" className={getLinkClasses("/employee/attendance")}>
                                     <Clock className="mr-2 h-4 w-4" />
                                     Attendance
                                 </Link>
@@ -54,7 +55,7 @@ export function EmployeeSidebar() {
                         </SidebarMenuItem>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/employee/payroll">
+                                <Link href="/employee/payroll" className={getLinkClasses("/employee/payroll")}>
                                     <DollarSign className="mr-2 h-4 w-4" />
                                     Payroll
                                 </Link>
@@ -62,7 +63,7 @@ export function EmployeeSidebar() {
                         </SidebarMenuItem>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/employee/leave">
+                                <Link href="/employee/leave" className={getLinkClasses("/employee/leave")}>
                                     <TreePalm className="mr-2 h-4 w-4" />
                                     Leave
                                 </Link>
