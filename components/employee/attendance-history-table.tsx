@@ -23,8 +23,8 @@ export default function AttendanceHistoryTable({ history }: { any }) {
                     <TableHeader className="bg-muted/50">
                         <TableRow>
                             <TableHead>DATE</TableHead>
-                            <TableHead>CHECK IN</TableHead>
-                            <TableHead>CHECK OUT</TableHead>
+                            <TableHead>CLOCK IN</TableHead>
+                            <TableHead>CLOCK OUT</TableHead>
                             <TableHead>OT HOURS</TableHead>
                             <TableHead>ACTION</TableHead>
                         </TableRow>
