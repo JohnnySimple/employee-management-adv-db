@@ -136,7 +136,7 @@ export default function EmployeePayroll() {
                                     Upcoming payroll
                                 </CardTitle>
                             </div>
-                            <p>{ new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toLocaleDateString(undefined,
+                            <p>{ new Date(new Date().getFullYear(), new Date().getMonth() , 23).toLocaleDateString(undefined,
                                 {
                                     year: "numeric",
                                     month: "long",

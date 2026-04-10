@@ -487,24 +487,30 @@ const jobTitleRates = new Map([
 
 const salaryRecords: any[] = [];
 const allEmployees = [constManager, hrManager, ...createdEmployees];
+const currentMonth = now.getMonth();
+const currentYear = now.getFullYear();
 
 allEmployees.forEach(emp => {
     // 2. Group the attendanceRecords by Month/Year for THIS employee
     const monthlyBundles: { [key: string]: { reg: number, ot: number } } = {};
 
-    attendanceRecords
-        .filter(record => record.employeeId === emp.employeeId)
-        .forEach(record => {
-            const date = new Date(record.workDate);
-            const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`; // e.g., "2026-2"
+ attendanceRecords
+    .filter(record => {
+        const date = new Date(record.workDate);
+        // Match the employee AND exclude the current month/year
+        return record.employeeId === emp.employeeId && 
+               !(date.getMonth() === currentMonth && date.getFullYear() === currentYear);
+    })
+    .forEach(record => {
+        const date = new Date(record.workDate);
+        const monthYear = `${date.getFullYear()}-${date.getMonth() + 1}`;
 
-            if (!monthlyBundles[monthYear]) {
-                monthlyBundles[monthYear] = { reg: 0, ot: 0 };
-            }
-            monthlyBundles[monthYear].reg += record.hoursWorked;
-            monthlyBundles[monthYear].ot += record.overtimeHours;
-        });
-
+        if (!monthlyBundles[monthYear]) {
+            monthlyBundles[monthYear] = { reg: 0, ot: 0 };
+        }
+        monthlyBundles[monthYear].reg += record.hoursWorked;
+        monthlyBundles[monthYear].ot += record.overtimeHours;
+    });
     // 3. Calculate pay for each month found
     Object.keys(monthlyBundles).forEach(monthYear => {
         const [year, month] = monthYear.split('-').map(Number);
