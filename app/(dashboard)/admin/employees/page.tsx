@@ -23,7 +23,7 @@ export default function AdminEmployees() {
             </h1>
 
             <div className="flex justify-end">
-                <Button variant="outline" size="sm" className="mb-4" onClick={openAddEmployeeModal}>
+                <Button variant="outline" className="mb-4 text-[15px] border rounded-xl px-6 py-6 tracking-widest hover:bg-gray-400 active:bg-gray-500" onClick={openAddEmployeeModal}>
                     Add Employee
                 </Button>
             </div>
