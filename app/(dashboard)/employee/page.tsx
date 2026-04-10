@@ -167,7 +167,7 @@ export default function EmployeeHome() {
         </div>
       </div>
       <Toaster />
-      <div className="flex flex-wrap gap-4 mb-6">
+      <div className="flex flex-wrap gap-20 mb-6">
         {/* generate cards to hold relevant summaries(like total employees, active projects, attendance etc) */}
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
@@ -220,7 +220,7 @@ export default function EmployeeHome() {
           </Card>
         </div>
         
-        <div className="w-full sm:w-[48%] lg:w-[23%]">
+        {/* <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
@@ -235,7 +235,7 @@ export default function EmployeeHome() {
               </p>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 w-full">
