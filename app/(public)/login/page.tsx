@@ -20,6 +20,7 @@ type FormData = z.infer<typeof formSchema>;
     
 export default function Loginpage() {
     const router = useRouter()
+    const [isLoading, setIsLoading] = useState(false);
 
     // const [email, setEmail] = useState("")
     // const [password, setPassword] = useState("")
@@ -90,10 +91,11 @@ export default function Loginpage() {
                         </div>
                     </CardContent>
                     <CardFooter className="mt-8">
-                        <Button type="submit" className="w-full">Login</Button>
+                        <Button type="submit" className="w-full">
+                            {isLoading ? "Logging in..." : "Login"}
+                        </Button>
                     </CardFooter>
                 </form>
-                
             </Card>
         </div>
     )

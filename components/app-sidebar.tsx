@@ -15,6 +15,7 @@ import {
 import { Building2, Clock, DollarSign, FileText, LayoutDashboard, LogOut, Settings, Shield, Users, User, Calendar } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import {getLinkClasses}  from "@/components/admin/getLinkClasses/getLinkClasses";
 
 export function AppSidebar() {
 
@@ -36,7 +37,7 @@ export function AppSidebar() {
                     <SidebarMenu>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/admin">
+                                <Link href="/admin" className={getLinkClasses("/admin")}>
                                     <LayoutDashboard className="mr-2 h-4 w-4" />
                                     Dashboard
                                 </Link>
@@ -45,7 +46,7 @@ export function AppSidebar() {
 
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/admin/employees">
+                                <Link href="/admin/employees" className={getLinkClasses("/admin/employees")}>
                                     <Users className="mr-2 h-4 w-4" />
                                     Employees
                                 </Link>
@@ -54,7 +55,7 @@ export function AppSidebar() {
 
                          <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/admin/projects">
+                                <Link href="/admin/projects" className={getLinkClasses("/admin/projects")}>
                                     <Building2 className="mr-2 h-4 w-4" />
                                     Projects
                                 </Link>
@@ -75,7 +76,7 @@ export function AppSidebar() {
                         </SidebarMenuItem> */}
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/admin/attendance">
+                                <Link href="/admin/attendance" className={getLinkClasses("/admin/attendance")}  >
                                     <Calendar className="mr-2 h-4 w-4" />
                                     Leave 
                                 </Link>
@@ -83,7 +84,7 @@ export function AppSidebar() {
                         </SidebarMenuItem>
                         <SidebarMenuItem>
                             <SidebarMenuButton asChild>
-                                <Link href="/admin/payroll">
+                                <Link href="/admin/payroll" className={getLinkClasses("/admin/payroll")}>
                                     <DollarSign className="mr-2 h-4 w-4" />
                                     Payroll
                                 </Link>

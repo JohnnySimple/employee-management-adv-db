@@ -63,9 +63,9 @@ export default function EmployeeLeave() {
         <div className="p-6 space-y-6">
             <Toaster />
             <div className="flex justify-between">
-                <h3>Leave Balance</h3>
+                <h3 className="font-bold text-xl tracking-widest">Leave Balance</h3>
                 <div className="flex justify-end">
-                    <Button variant="outline" size="sm" className="mb-4" onClick={() => setOpenApplyForLeaveModal(true)}>
+                    <Button variant="outline" className="mb-4 rounded-xl px-6 py-6 text-[15px] tracking-widest hover:bg-gray-400 active:bg-gray-500" onClick={() => setOpenApplyForLeaveModal(true)}>
                         Apply for Leave
                     </Button>
                 </div>

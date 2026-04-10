@@ -1,13 +1,13 @@
 "use client";
 
-import { 
+import {
     Table,
     TableCell,
     TableHead,
     TableHeader,
     TableBody,
     TableRow
- } from "@/components/ui/table";
+} from "@/components/ui/table";
 
 import { Card } from "@/components/ui/card";
 import ProjectActionsDropdown from "@/components/admin/project-action-dropdowns";
@@ -62,12 +62,14 @@ export default function ProjectPage() {
         <>
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold">Projects</h1>
-                <button
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="px-4 py-1.5 text-sm border rounded-md hover:bg-muted/50 transition-colors"
-                >
-                    Add Project
-                </button>
+                <div className="mt-2 flex justify-end">
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="mb-4 text-[15px] border rounded-xl px-4 py-4 tracking-widest hover:bg-gray-400 active:bg-gray-500"
+                    >
+                        Add Project
+                    </button>
+                </div>
             </div>
 
             <Card className="overflow-hidden">

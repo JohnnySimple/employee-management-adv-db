@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
-import { ChartBar } from "lucide-react";
 import api from "@/lib/api";
 import AttendanceHistoryTable from "@/components/employee/attendance-history-table";
 import { Hourglass, Clock, Play, Square } from "lucide-react";
@@ -64,7 +63,7 @@ export default function EmployeeAttendance() {
                         <Hourglass className="w-7 h-7 text-purple-600" />
                     </div>
                     <div>
-                        <p className="text-xs text-muted-foreground">Total Hours</p>
+                        <h1 className="text-muted-foreground">Total Hours</h1>
                         <p className="text-xl font-semibold">{ totalHours?.toFixed(2) }</p>
                     </div>
                 </div>
@@ -77,7 +76,7 @@ export default function EmployeeAttendance() {
                         <Clock className="w-7 h-7 text-blue-600" />
                     </div>
                     <div>
-                        <p className="text-xs text-muted-foreground">Average Working Hours</p>
+                        <h1 className="text-muted-foreground">Average Working Hours</h1>
                         <p className="text-xl font-semibold">{ averageWorkingHours?.toFixed(2) }</p>
                     </div>
                 </div>
@@ -90,7 +89,7 @@ export default function EmployeeAttendance() {
                         <Play className="w-7 h-7 text-green-600" />
                     </div>
                     <div>
-                        <p className="text-xs text-muted-foreground">Average Check In Time</p>
+                        <h1 className="text-muted-foreground">Average Clock In Time</h1>
                         <p className="text-xl font-semibold">{ averageCheckIn }</p>
                     </div>
                 </div>
@@ -103,7 +102,7 @@ export default function EmployeeAttendance() {
                         <Square className="w-7 h-7 text-orange-600" />
                     </div>
                     <div>
-                        <p className="text-xs text-muted-foreground">Average Check Out Time</p>
+                        <h1 className="text-muted-foreground">Average Clock Out Time</h1>
                         <p className="text-xl font-semibold">{ averageCheckOut }</p>
                     </div>
                 </div>

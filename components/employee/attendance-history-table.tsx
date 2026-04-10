@@ -10,11 +10,11 @@ import {
  } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Card } from "../ui/card";
-import { Button } from "../ui/button";
-import { Pencil } from "lucide-react";
+// import { Button } from "../ui/button";
+// import { Pencil } from "lucide-react";
 
 
-export default function AttendanceHistoryTable({ history }: { any }) {
+export default function AttendanceHistoryTable({ history }: { history:any[] }) {
 
     return (
         <Card className="overflow-hidden p-6">
@@ -23,10 +23,10 @@ export default function AttendanceHistoryTable({ history }: { any }) {
                     <TableHeader className="bg-muted/50">
                         <TableRow>
                             <TableHead>DATE</TableHead>
-                            <TableHead>CHECK IN</TableHead>
-                            <TableHead>CHECK OUT</TableHead>
+                            <TableHead>CLOCK IN</TableHead>
+                            <TableHead>CLOCK OUT</TableHead>
                             <TableHead>OT HOURS</TableHead>
-                            <TableHead>ACTION</TableHead>
+                            {/* <TableHead>ACTION</TableHead> */}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -68,12 +68,12 @@ export default function AttendanceHistoryTable({ history }: { any }) {
                                         <span>-</span>
                                     ) }
                                 </TableCell>
-                                <TableCell className="text-sm text-muted-foreground">
+                                {/* <TableCell className="text-sm text-muted-foreground">
                                     <Button variant="outline" size="sm" className="">
                                         <Pencil />
                                         Edit
                                     </Button>
-                                </TableCell>
+                                </TableCell> */}
                             </TableRow>
                         ))}
                     </TableBody>
