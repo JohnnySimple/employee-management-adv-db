@@ -15,6 +15,8 @@ export default function EmployeeHome() {
     const [attendance, setAttendance] = useState([]);
     const [user, setUser] = useState(null);
     const [stats, setStats] = useState(null);
+    const [leaveStats, setLeaveStats] = useState(null);
+
 
     // get logged in employee from token
     useEffect(() => {
@@ -85,6 +87,43 @@ export default function EmployeeHome() {
             toast.error(`Error clocking out. ${error?.response?.data?.message}`);
         }
     }
+
+    useEffect(() => {
+
+        const fetchLeaveStats = async () => {
+            try {
+                const response = await api.get(`/leaveemp/stats`);
+                setLeaveStats(response.data);
+                console.log(response.data);
+            } catch (error) {
+                console.error("Error fetching leave stats:", error);
+            }
+        };
+
+        fetchLeaveStats();
+    }, []);
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const thisMonthRecords = attendance?.filter(a => {
+    const recordDate = new Date(a.workDate);
+    return recordDate.getMonth() === currentMonth && 
+            recordDate.getFullYear() === currentYear;
+    }) || [];
+
+    const lastMonthRecords = attendance?.filter(a => {
+    const recordDate = new Date(a.workDate);
+    return recordDate.getMonth() === currentMonth - 1 && 
+            recordDate.getFullYear() === currentYear;
+    }) || [];
+
+
+
+    const totalDaysThisMonth = thisMonthRecords.length;
+    const totalDaysLastMonth = lastMonthRecords.length;
+
     
     return (
     <div className="p-6 space-y-6">
@@ -176,9 +215,9 @@ export default function EmployeeHome() {
               <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1</div>
+              <div className="text-2xl font-bold">{totalDaysLastMonth}</div>
               <p className="text-xs text-muted-foreground">
-                Attendance Last Month In Days
+                Days Worked Last Month
               </p>
             </CardContent>
           </Card>
@@ -193,9 +232,9 @@ export default function EmployeeHome() {
               <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">14 days</div>
+              <div className="text-2xl font-bold">{totalDaysThisMonth}</div>
               <p className="text-xs text-muted-foreground">
-                Attendance This Month In Days
+                Days Worked This Month
               </p>
             </CardContent>
           </Card>
@@ -205,14 +244,15 @@ export default function EmployeeHome() {
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
-                Leave Balance
+                Leave Balance This Year
               </CardTitle>
               <Umbrella className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">0</div>
+              <div className="text-2xl font-bold"> {leaveStats ? `${leaveStats.stats["PTO"]?.usedHours || 0}/${leaveStats.stats["PTO"]?.remaining + leaveStats.stats["PTO"]?.usedHours || 0}` : "Loading..."}
+              </div>
               <p className="text-xs text-muted-foreground">
-                Remaining Leave For This Year
+                Remaining Leave In Hours
               </p>
             </CardContent>
           </Card>
