@@ -120,8 +120,8 @@ const employeesData = [
     { firstName: "Jane", lastName: "Smith", email: "jane@company.com", deptId: labor.deptId, titleId: constructionJunior.jobTitleId },
     { firstName: "Bob", lastName: "Brown", email: "bob@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId },
     { firstName: "Alice", lastName: "White", email: "alice@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId},
-    { firstName: "Anita", lastName: "Taylor", email: "anita@company.com", deptId: hr.deptId, titleId: constructionIntro.jobTitleId },
-    { firstName: "Mark", lastName: "Davis", email: "mark@company.com", deptId: hr.deptId, titleId: constructionIntro.jobTitleId },
+    { firstName: "Anita", lastName: "Taylor", email: "anita@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId },
+    { firstName: "Mark", lastName: "Davis", email: "mark@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId },
     { firstName: "Lucy", lastName: "Wilson", email: "lucy@company.com", deptId: hr.deptId, titleId: hrTitle.jobTitleId },
     { firstName: "Tom", lastName: "Clark", email: "tom@company.com", deptId: hr.deptId, titleId: hrTitle.jobTitleId },
     { firstName: "Kevin", lastName: "Lee", email: "kevin@company.com", deptId: hr.deptId, titleId: hrTitle.jobTitleId },
@@ -132,7 +132,7 @@ const createdEmployees = []
 for (const emp of employeesData) {
     const newEmp = await prisma.employee.create({
         data: {
-            firstName: emp.firstName,
+            firstName: emp.firstName,                 
             lastName: emp.lastName,
             dob: new Date("2000-01-01"),
             hireDate: new Date("2022-01-01"),

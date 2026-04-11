@@ -32,6 +32,10 @@ export default function EmployeeAttendance() {
         return `${h12}:${m.toString().padStart(2, "0")} ${period}`;
     }
 
+    
+
+
+
     const totalHours = attendance?.reduce((sum, a) => sum + (a.hoursWorked || 0) + (a.overtimeHours || 0), 0);
     const averageWorkingHours = attendance?.reduce((sum, a) => sum + (a.hoursWorked || 0), 0) / (attendance?.length || 1);
 
