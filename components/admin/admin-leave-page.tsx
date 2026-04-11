@@ -46,24 +46,18 @@ interface LeaveRecord {
 }
 
 const COLORS = {
-    primary: "#18181b",
-    secondary: "#3f3f46",
-    tertiary: "#71717a",
-    light: "#d4d4d8",
+    primary: "#111827",
+    secondary: "#374151",
+    tertiary: "#6b7280",
 
     barPalette: [
-        "#18181b",
-        "#27272a",
-        "#3f3f46",
-        "#52525b",
-        "#71717a"
+        "#2563eb", // blue
+        "#f97316", // orange
+        "#10b981", // green
+        "#ef4444", // red
+        "#a855f7"  // purple
     ]
 };
-
-const COLORS1= {
-    barPalette: ["#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"],
-};
-
 
 export default function AdminLeavePage() {
     const [search, setSearch] = useState("");
@@ -139,15 +133,29 @@ export default function AdminLeavePage() {
 
     // const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const today = new Date();
-    const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
+
+    const cutoffDate = new Date();
+    cutoffDate.setDate(today.getDate() - 90);
+
+
+    const approvedRecentCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
     // const rejectedCount = leaveData.filter((r) => r.leaveDateStatus === "Rejected").length;
     //Upcoming Leaves
-    const upcomingLeaves = leaveData.filter((r) => r.leaveDateStatus === "Approved" && new Date(r.startDate) > today).length;
+    const upcomingLeaves = leaveData.filter(
+        (r) =>
+            r.leaveDateStatus === "Approved" &&
+            new Date(r.startDate) > today
+    ).length;
+
     // Employees on Leave Today
-    const onLeaveToday = leaveData.filter((r) => new Date(r.startDate) <= today && new Date(r.endDate) >= today).length;
-    // const totalHoursOff = leaveData.reduce((sum, r) => sum + (r.hoursOff || 0), 0);
-    // const avgHoursOff = leaveData.length ? (totalHoursOff / leaveData.length).toFixed(1) : 0;
+    const onLeaveToday = leaveData.filter(
+        (r) =>
+            new Date(r.startDate) <= today &&
+            new Date(r.endDate) >= today &&
+            r.leaveDateStatus === "Approved"
+    ).length;
+
 
     // Leave Type Map
     const typeMap: Record<string, number> = {};
@@ -171,23 +179,36 @@ export default function AdminLeavePage() {
     // ];
 
     // Monthly Leave Trends (Leaves per month)
-    const monthlyTypeMap: Record<string, Record<string, number>> = {};
-    leaveData.forEach((r) => {
-        const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
-        if (!monthlyTypeMap[month]) monthlyTypeMap[month] = {};
-        if (!monthlyTypeMap[month][r.leaveType]) monthlyTypeMap[month][r.leaveType] = 0;
+      const monthlyTypeMap: Record<string, Record<string, number>> = {};
 
-        monthlyTypeMap[month][r.leaveType]++;
+    leaveData.forEach(r => {
+        const month = new Date(r.startDate).toLocaleString("default", {
+            month: "short"
+        });
+
+        if (r.leaveDateStatus === "Approved") {
+            if (!monthlyTypeMap[month]) monthlyTypeMap[month] = {};
+            if (!monthlyTypeMap[month][r.leaveType]) {
+                monthlyTypeMap[month][r.leaveType] = 0;
+            }
+            monthlyTypeMap[month][r.leaveType]++;
+        }
     });
+
     let monthlyTypeData = Object.keys(monthlyTypeMap).map(month => ({
         name: month,
         ...monthlyTypeMap[month]
     }));
-      if (monthSearch) {
-        monthlyTypeData = monthlyTypeData.filter((m) => m.name.toLowerCase().includes(monthSearch.toLowerCase()));
+
+    if (monthSearch) {
+        monthlyTypeData = monthlyTypeData.filter(m =>
+            m.name.toLowerCase().includes(monthSearch.toLowerCase())
+        );
     }
 
-    const leaveTypes = Object.keys(typeMap);
+     const leaveTypes = Array.from(
+        new Set(leaveData.map(r => r.leaveType))
+    );
     // const monthlyMap: Record<string, number> = {};
     // leaveData.forEach((r) => {
     //     const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
@@ -200,32 +221,25 @@ export default function AdminLeavePage() {
     // }));
 
     // Top Employees with most leaves
-    const empMap: Record<string, number> = {};
+   const empMap: Record<string, number> = {};
+
     leaveData.forEach(r => {
-        empMap[r.employeeName] = (empMap[r.employeeName] || 0) + r.hoursOff;
+        if (r.leaveDateStatus === "Approved") {
+            empMap[r.employeeName] =
+                (empMap[r.employeeName] || 0) + 1;
+        }
     });
 
-    let topEmployees = Object.keys(empMap)
-        .map(key => ({ name: key, value: empMap[key] }))
-        .sort((a, b) => b.value - a.value)
+    let employeeChartData = Object.entries(empMap)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count)
         .slice(0, 5);
-     if (employeeSearch) {
-         topEmployees = topEmployees.filter((e) => e.name.toLowerCase().includes(employeeSearch.toLowerCase()));
-    }
+        if (employeeSearch) {
+            employeeChartData = employeeChartData.filter(e =>
+                e.name.toLowerCase().includes(employeeSearch.toLowerCase())
+            );
+        }
 
-    // Leave Duration Distribution
-    const durationMap: Record<string, number> = {};
-    leaveData.forEach((r) => {
-        const bucket = r.hoursOff <= 4 ? '0-4' : r.hoursOff <= 8 ? '4-8' : r.hoursOff <= 16 ? '8-16' : '16+';
-        durationMap[bucket] = (durationMap[bucket] || 0) + 1;
-    });
-    const durationData = Object.entries(durationMap).map(([bucket, count]) => ({ bucket, count }));
-
-    const mergedChartData = topEmployees.map((emp, idx) => ({
-        name: emp.name,
-        hoursOff: emp.value,
-        LeaveDuration: durationData[idx]?.count || 0
-    }));
 
     const filteredData = leaveData.filter((row) =>
         row.employeeName.toLowerCase().includes(search.toLowerCase())
@@ -262,6 +276,7 @@ export default function AdminLeavePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="Tracking-widest font-bold">Pending Requests</CardTitle>
+                        <p className="text-sm text-muted-foreground">Requests awaiting approval</p>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
@@ -282,22 +297,11 @@ export default function AdminLeavePage() {
                         </div>
                     </CardContent>
                 </Card> */}
-                {/* Appproved Leaves Count */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="Tracking-widest font-bold">Approved Leaves</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center gap-2">
-                            <UserCheck className="w-6 h-6 text-blue-500" />
-                            <span className="tracking-wide text-xl font-bold">{approvedCount}</span>
-                        </div>
-                    </CardContent>
-                </Card>
                 {/* On Leave Today */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="Tracking-widest font-bold">On Leave Today</CardTitle>
+                        <CardTitle className="Tracking-widest font-bold">On Leave</CardTitle>
+                        <p className="text-sm text-muted-foreground">Employees on leave today</p>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
@@ -310,11 +314,25 @@ export default function AdminLeavePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="tracking-widest font-bold">Upcoming Leaves</CardTitle>
+                        <p className="text-sm text-muted-foreground">Planned leave in the next 30 days</p>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <Calendar className="w-6 h-6 text-blue-500" />
                             <span className="tracking-wide text-xl font-bold">{upcomingLeaves}</span>
+                        </div>
+                    </CardContent>
+                </Card>
+                {/* Appproved Leaves Count */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="Tracking-widest font-bold">YTD (Last 90 days)</CardTitle>
+                        <p className="text-sm text-muted-foreground">Recent leave activity</p>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex items-center gap-2">
+                            <UserCheck className="w-6 h-6 text-blue-500" />
+                            <span className="tracking-wide text-xl font-bold">{approvedRecentCount}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -407,14 +425,14 @@ export default function AdminLeavePage() {
             </div>
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                 {/* Monthly Leave Type */}
+                {/* Monthly Leave Type */}
                 <Card className="border border-gray-300 rounded-md">
                     <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Distribution</CardTitle>
-                    <p className="tracking-wide text-gray-500">Leave type breakdown per month data</p>
-                    <div className="mt-2 flex items-center gap-2">
-                        <Input placeholder="Filter by month" value={monthSearch} onChange={(e) => setMonthSearch(e.target.value)} className="input" />
+                        <p className="tracking-wide text-gray-500">Leave type breakdown per month data</p>
+                        <div className="mt-2 flex items-center gap-2">
+                            <Input placeholder="Filter by month" value={monthSearch} onChange={(e) => setMonthSearch(e.target.value)} className="input" />
                             {monthSearch && <Button size="sm" onClick={() => setMonthSearch("")}>Clear</Button>}
-                    </div>
+                        </div>
                     </CardHeader>
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
@@ -425,7 +443,7 @@ export default function AdminLeavePage() {
                                 <ReTooltip />
                                 <Legend />
                                 {leaveTypes.map((type, idx) => (
-                                    <Bar key={type} dataKey={type} stackId="a" fill={COLORS1.barPalette[idx % COLORS.barPalette.length]} />
+                                    <Bar key={type} dataKey={type} stackId="a" fill={COLORS.barPalette[idx % COLORS.barPalette.length]} />
                                 ))}
                             </BarChart>
                         </ResponsiveContainer>
@@ -433,29 +451,35 @@ export default function AdminLeavePage() {
                 </Card>
 
                 {/* Merged Top Employees & Duration */}
-                <Card className="border border-gray-300 rounded-md">
-                    <CardHeader><CardTitle className="tracking-widest font-bold">Top Employee Leave Distribution</CardTitle>
-                    <p className="tracking-wide text-gray-500">Top employees leave duration data</p>
-                    <div className="mt-2 flex items-center gap-2">
-                        <Input placeholder="Filter by employee" value={employeeSearch} onChange={(e) => setEmployeeSearch(e.target.value)} className="input" />
-                        {employeeSearch && <Button size="sm" value={employeeSearch} onClick={()=> setEmployeeSearch("")}>Clear</Button>}
-                    </div>
+                    <Card>
+                    <CardHeader>
+                        <CardTitle className="font-bold tracking-widest">Top Employees (Approved Leaves)</CardTitle>
+                        <p className="text-xs text-muted-foreground">
+                            Employees with highest leave frequency
+                        </p>
+                        <div className="mt-2 flex w-full items-center gap-2">
+                            <Input placeholder="Search Employee" value={employeeSearch} onChange={(e) => setEmployeeSearch(e.target.value)} className="input" />
+                            {employeeSearch && <Button size="sm" onClick={() => setEmployeeSearch("")}>Clear</Button>}
+                        </div>
                     </CardHeader>
+
                     <CardContent className="h-72">
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={mergedChartData}>
+                            <BarChart data={employeeChartData}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
-                                <YAxis yAxisId="left" orientation="left" />
-                                <YAxis yAxisId="right" orientation="right" />
+                                <YAxis />
                                 <ReTooltip />
-                                <Legend />
-                                <Bar yAxisId="left" dataKey="hoursOff" fill={COLORS.barPalette[0]} name="Hours Off" />
-                                <Bar yAxisId="right" dataKey="LeaveDuration" fill={COLORS.barPalette[1]} name="Leave Duration" />
+
+                                <Bar
+                                    dataKey="count"
+                                    fill={COLORS.barPalette[0]}
+                                />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
+
             </div>
         </div>
     )
