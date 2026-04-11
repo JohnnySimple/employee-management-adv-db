@@ -350,7 +350,7 @@ for (let i = 1; i < 43; i++) {
 
     const jitterMinutes = Math.floor(rng() * 30) - 15;
     
-    const tempIn = new Date(`${datePart}T05:00:00.000Z`);
+    const tempIn = new Date(`${datePart}T09:00:00`);
     tempIn.setMinutes(tempIn.getMinutes() + jitterMinutes);
     const tempOut = new Date(tempIn.getTime() + (totalHoursForDay * 3600000));
 
@@ -401,8 +401,8 @@ for (let i = 1; i <= 12; i++) {
             attendanceRecords.push({
                 employeeId: emp.employeeId,
                 workDate: new Date(monthDate),
-                timeIn: new Date(`${dateString}T01:00:00`),
-                timeOut: new Date(`${dateString}T09:00:00`),
+                timeIn: new Date(`${dateString}T09:00:00`),
+                timeOut: new Date(`${dateString}T17:00:00`),
                 hoursWorked: Math.floor(baseTarget),
                 overtimeHours: Math.floor(otTarget)
             });

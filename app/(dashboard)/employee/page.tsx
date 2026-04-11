@@ -115,10 +115,8 @@ export default function EmployeeHome() {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 w-fit">
                 <svg className="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold text-blue-700">{stats?.activeProjectCount}</span> active projects
                 </p>
               </div>
             </div>
@@ -167,20 +165,37 @@ export default function EmployeeHome() {
         </div>
       </div>
       <Toaster />
-      <div className="flex flex-wrap gap-20 mb-6">
-        {/* generate cards to hold relevant summaries(like total employees, active projects, attendance etc) */}
+    <div className="flex flex-wrap gap-4 mb-6">
+          {/* generate cards to hold relevant summaries(like total employees, active projects, attendance etc) */}
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
-                Attendance Rate
+                Attendance Last Month
               </CardTitle>
               <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">1</div>
               <p className="text-xs text-muted-foreground">
-                from last month
+                Attendance Last Month In Days
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="w-full sm:w-[48%] lg:w-[23%]">
+          <Card className="flex-1">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-sm font-medium">
+                Attendance This Month
+              </CardTitle>
+              <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">14 days</div>
+              <p className="text-xs text-muted-foreground">
+                Attendance This Month In Days
               </p>
             </CardContent>
           </Card>
@@ -195,15 +210,15 @@ export default function EmployeeHome() {
               <Umbrella className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">14 days</div>
+              <div className="text-2xl font-bold">0</div>
               <p className="text-xs text-muted-foreground">
-                Remaining annual leave
+                Remaining Leave For This Year
               </p>
             </CardContent>
           </Card>
         </div>
         
-        <div className="w-full sm:w-[48%] lg:w-[23%]">
+         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
@@ -214,28 +229,11 @@ export default function EmployeeHome() {
             <CardContent>
               <div className="text-2xl font-bold">{stats?.activeProjectCount ?? 0}</div>
               <p className="text-xs text-muted-foreground">
-                Active project assignments
+                Active Project Assignments
               </p>
             </CardContent>
           </Card>
-        </div>
-        
-        {/* <div className="w-full sm:w-[48%] lg:w-[23%]">
-          <Card className="flex-1">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-medium">
-                Performance
-              </CardTitle>
-              <Activity className="w-4 h-4 text-muted-foreground"/>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                some info
-              </p>
-            </CardContent>
-          </Card>
-        </div> */}
+        </div> 
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 w-full">
