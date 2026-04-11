@@ -134,18 +134,17 @@ export default function AdminLeavePage() {
     // const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const today = new Date();
 
-    const cutoffDate = new Date();
+    const cutoffDate = new Date(today);
     cutoffDate.setDate(today.getDate() - 90);
 
 
-    const approvedRecentCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
+    const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
     // const rejectedCount = leaveData.filter((r) => r.leaveDateStatus === "Rejected").length;
     //Upcoming Leaves
-    const upcomingLeaves = leaveData.filter(
-        (r) =>
-            r.leaveDateStatus === "Approved" &&
-            new Date(r.startDate) > today
+     const upcomingLeaves = leaveData.filter(r =>
+        r.leaveDateStatus === "Approved" &&
+        new Date(r.startDate) >= today
     ).length;
 
     // Employees on Leave Today
@@ -155,6 +154,15 @@ export default function AdminLeavePage() {
             new Date(r.endDate) >= today &&
             r.leaveDateStatus === "Approved"
     ).length;
+
+      const approvedRecentCount = leaveData.filter(r => {
+        const start = new Date(r.startDate);
+        return (
+            r.leaveDateStatus === "Approved" &&
+            start >= cutoffDate &&
+            start <= today
+        );
+    }).length;
 
 
     // Leave Type Map
@@ -276,13 +284,13 @@ export default function AdminLeavePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="Tracking-widest font-bold">Pending Requests</CardTitle>
-                        <p className="text-sm text-muted-foreground">Requests awaiting approval</p>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <UserCheck className="w-6 h-6 text-yellow-500" />
                             <span className="tracking-wide text-xl font-bold">{pendingCount}</span>
                         </div>
+                        <p className="text-sm text-muted-foreground">Requests awaiting approval</p>
                     </CardContent>
                 </Card>
 
@@ -301,39 +309,42 @@ export default function AdminLeavePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="Tracking-widest font-bold">On Leave</CardTitle>
-                        <p className="text-sm text-muted-foreground">Employees on leave today</p>
+                        
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <User className="w-6 h-6 text-green-500" />
                             <span className="tracking-wide text-xl font-bold">{onLeaveToday}</span>
                         </div>
+                        <p className="text-sm text-muted-foreground">Employees on leave today</p>
                     </CardContent>
                 </Card>
                 {/* Upcoming Leaves */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="tracking-widest font-bold">Upcoming Leaves</CardTitle>
-                        <p className="text-sm text-muted-foreground">Planned leave in the next 30 days</p>
+                        
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <Calendar className="w-6 h-6 text-blue-500" />
                             <span className="tracking-wide text-xl font-bold">{upcomingLeaves}</span>
                         </div>
+                        <p className="text-sm text-muted-foreground">Planned leave in the next 30 days</p>
                     </CardContent>
                 </Card>
                 {/* Appproved Leaves Count */}
                 <Card>
                     <CardHeader>
                         <CardTitle className="Tracking-widest font-bold">YTD (Last 90 days)</CardTitle>
-                        <p className="text-sm text-muted-foreground">Recent leave activity</p>
+                        
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <UserCheck className="w-6 h-6 text-blue-500" />
                             <span className="tracking-wide text-xl font-bold">{approvedRecentCount}</span>
                         </div>
+                        <p className="text-sm text-muted-foreground">Recent leave activity</p>
                     </CardContent>
                 </Card>
                 {/* Average Hours Off
