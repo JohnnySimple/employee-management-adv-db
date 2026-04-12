@@ -16,6 +16,8 @@ export default function EmployeeHome() {
     const [user, setUser] = useState(null);
     const [stats, setStats] = useState(null);
     const [leaveStats, setLeaveStats] = useState(null);
+    const [employeeLeave, setEmployeeLeave] = useState(null);
+
 
 
     // get logged in employee from token
@@ -103,6 +105,24 @@ export default function EmployeeHome() {
         fetchLeaveStats();
     }, []);
 
+
+    useEffect(() => {
+    const fetchEmployeeLeave = async () => {
+        if (!user || !user.employeeId) 
+            return;
+
+        try {
+            const response = await api.get(`/employeeLeave/employee/${user.employeeId}`);
+            setEmployeeLeave(response.data);
+        } catch (error) {
+            console.error("Failed to fetch leave:", error);
+        }
+    };
+
+        fetchEmployeeLeave();
+    }, [user]);
+
+
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
@@ -124,7 +144,18 @@ export default function EmployeeHome() {
     const totalDaysThisMonth = thisMonthRecords.length;
     const totalDaysLastMonth = lastMonthRecords.length;
 
-    
+      if (!employeeLeave || !user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="ml-4">Loading your profile...</p>
+            </div>
+        );
+    }
+
+    const totalRemaining = employeeLeave.totalRemaining;
+
+
     return (
     <div className="p-6 space-y-6">
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-sm border border-blue-100/50">
@@ -249,7 +280,7 @@ export default function EmployeeHome() {
               <Umbrella className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold"> {leaveStats ? `${leaveStats.stats["PTO"]?.usedHours || 0}/${leaveStats.stats["PTO"]?.remaining + leaveStats.stats["PTO"]?.usedHours || 0}` : "Loading..."}
+              <div className="text-2xl font-bold"> {`${employeeLeave.totalRemaining} hrs / ${employeeLeave.totalLeaveHours} hrs`}
               </div>
               <p className="text-xs text-muted-foreground">
                 Remaining Leave In Hours

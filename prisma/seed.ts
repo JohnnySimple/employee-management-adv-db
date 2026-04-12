@@ -424,13 +424,16 @@ const today: Date = new Date();
 const tomorrow: Date = new Date();
 tomorrow.setDate(today.getDate() + 1);
 
-// 2. Data Array
 const leaveData = [
     { emp: constManager, start: "2026-02-10", end: "2026-02-15", hours: 40, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[0], start: "2026-01-05", end: "2026-01-10", hours: 40, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[1], start: "2026-03-12", end: "2026-03-14", hours: 24, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[4], start: "2026-02-07", end: "2026-02-08", hours: 8, status: "Approved", type: sick.leaveId },
     { emp: hrManager, start: "2026-06-15", end: "2026-06-20", hours: 40, status: "Approved", type: pto.leaveId },
+    { emp: hrManager, start: "2026-05-7", end: "2026-05-8", hours: 16, status: "Approved", type: pto.leaveId },
+    { emp: hrManager, start: "2026-04-12", end: "2026-04-12", hours: 8, status: "Approved", type: pto.leaveId },
+    { emp: hrManager, start: "2026-12-23", end: "2026-12-25", hours: 24, status: "Pending", type: pto.leaveId },
+
     { emp: createdEmployees[5], start: "2026-05-20", end: "2026-05-25", hours: 40, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[2], start: "2026-08-10", end: "2026-08-13", hours: 24, status: "Pending", type: pto.leaveId },
     { emp: createdEmployees[6], start: "2026-09-01", end: "2026-09-03", hours: 16, status: "Pending", type: pto.leaveId },
@@ -440,20 +443,42 @@ const leaveData = [
     { emp: createdEmployees[7], start: "2026-07-01", end: "2026-07-02", hours: 8, status: "Approved", type: sick.leaveId },
 ];
 
-// 3. Logic Loop
-for (const leave of leaveData) {
-    const hoursToDeduct = leave.status === "Approved" ? leave.hours : 0;
-    const currentLeaveId = leave.type ?? pto.leaveId;
+const balances: { [key: number]: number } = {};
 
-    const empLeave = await prisma.employeeLeave.create({
-        data: {
-            employeeId: leave.emp.employeeId,
-            leaveId: currentLeaveId,
-            totalLeaveHours: 80,
-            totalRemaining: 80 - hoursToDeduct,
-            status: leave.status 
+for (const leave of leaveData) {
+    const empId = leave.emp.employeeId;
+    const currentLeaveId = leave.type ?? pto.leaveId;
+    const hoursToDeduct = leave.status === "Approved" ? leave.hours : 0;
+
+    if (!balances[empId]) {
+        balances[empId] = 120;
+    }
+    balances[empId] -= hoursToDeduct;
+
+    let empLeave = await prisma.employeeLeave.findFirst({
+        where: {
+            employeeId: empId,
+            leaveId: currentLeaveId
         }
     });
+
+    if (empLeave) {
+        // 2. If it exists, update it
+        empLeave = await prisma.employeeLeave.update({
+            where: { employeeLeaveId: empLeave.employeeLeaveId },
+            data: { totalRemaining: balances[empId] }
+        });
+    } else {
+        empLeave = await prisma.employeeLeave.create({
+            data: {
+                employeeId: empId,
+                leaveId: currentLeaveId,
+                totalLeaveHours: 120,
+                totalRemaining: balances[empId],
+                status: leave.status
+            }
+        });
+    }
 
     await prisma.leaveDate.create({
         data: {

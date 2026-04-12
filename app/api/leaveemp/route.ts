@@ -75,86 +75,47 @@ export async function GET(req:Request){
     }
 }
 
-// Allows an authenticated employee to apply for leave requests
-export async function POST(req:Request){
-    try{
-
+export async function POST(req: Request) {
+    try {
         const user = await getCurrentUser();
-        if (!user) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-        const employeeId = user.employeeId as number;
+        if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-        const { leaveId, startDate, endDate }=await req.json();
+        const { leaveId, startDate, endDate } = await req.json();
 
-        if (!leaveId) {
-            return NextResponse.json(
-                { error: { message: "LeaveId is expected" } },
-                { status: 400 }
-            )
-        }
-
-        // Check if Employee has any leave requests with pending status
-        const employeeLeave= await prisma.employeeLeave.findFirst({
-            where:{
-                employeeId,
-                leaveId:leaveId,
-            }
+        // 1. Get the general balance record for this employee
+        const employeeLeave = await prisma.employeeLeave.findFirst({
+            where: { employeeId: user.employeeId }
         });
-        console.log("Employee Leave Check:", employeeLeave);
-        if(!employeeLeave){
-            return NextResponse.json({error:{message:"You have a pending leave request. Please wait for it to be processed before applying for another leave."}} , {status:400});
+
+        if (!employeeLeave) {
+            return NextResponse.json({ error: "Employee balance record not found." }, { status: 404 });
         }
 
-        const start=new Date(startDate);
-        const end=new Date(endDate);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
 
-        // Validate the date objects to date type
-        if(isNaN(start.getTime()) || isNaN(end.getTime())){
-            return NextResponse.json({error:{message:"Invalid date format. Please provide valid start and end dates."}} , {status:400});
-        }
+        const days = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24) + 1;
+        const hoursOff = Math.round(days * 8);
 
-        //check if start date is after end date
-        if(start > end){
-            return NextResponse.json({error:{message:"Start date cannot be after end date."}} , {status:400});
-        }
-
-        // Calulate the hours
-        const days=(end.getTime() - start.getTime())/(1000*60*60*24)+1;
-        const hoursOff=days*8;
-
-        // Check balance without deduction
-        // if(employeeLeave.totalRemaining <hoursOff){
-        //     return NextResponse.json({error:{message:"You have sufficient leave balance. No need to submit leave request."}} , {status:400});
-        // }
-
-        // Prevent Overlapping leave requests
-        const overlappingLeave=await prisma.leaveDate.findFirst({
-            where:{employeeLeaveId:employeeLeave.employeeLeaveId,
-                status:"Pending",
-                startDate:{lte:end},
-                endDate:{gte:start}
-            }
-        });
-        if(overlappingLeave){
-            return NextResponse.json({error:{message:"You have an overlapping leave request. Please adjust your dates and try again."}} , {status:400});
-        }
-
-        // Create a new Leave Request
-        const newLeaveRequest=await prisma.leaveDate.create({
-            data:{
-                employeeLeaveId:employeeLeave.employeeLeaveId,
-                startDate:start,
-                endDate:end,
-                hoursOff,
-                status:"Pending"
+        // 3. Create the history record
+        // We removed the overlapping check and the strict balance check here
+        const newLeaveRequest = await prisma.leaveDate.create({
+            data: {
+                employeeLeaveId: employeeLeave.employeeLeaveId,
+                startDate: start,
+                endDate: end,
+                hoursOff: hoursOff,
+                status: "Pending",
+                // If your leaveDate table has a leaveId column, include it here:
+                // leaveId: leaveId 
             }
         });
 
-        return NextResponse.json({message:"Leave Request Submitted Successfully",newLeaveRequest},{status:201});
-    }catch(error){
-        console.log(error);
-        return NextResponse.json({error:{message:"Unable to submit leave request"}} , {status:500});
+        return NextResponse.json({ message: "Success", newLeaveRequest }, { status: 201 });
+
+    } catch (error) {
+        console.error("POST_ROUTE_ERROR:", error);
+        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }
 

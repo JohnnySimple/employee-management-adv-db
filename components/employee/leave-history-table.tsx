@@ -26,7 +26,6 @@ export default function LeaveHistoryTable({ history }: { any }) {
                             <TableHead>START DATE</TableHead>
                             <TableHead>END DATE</TableHead>
                             <TableHead>STATUS</TableHead>
-                            <TableHead>ACTION</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -71,9 +70,6 @@ export default function LeaveHistoryTable({ history }: { any }) {
                                             { leave.dateStatus }
                                         </span>
                                     ) }
-                                </TableCell>
-                                <TableCell className="text-sm text-muted-foreground">
-                                    Action
                                 </TableCell>
                             </TableRow>
                         ))}
