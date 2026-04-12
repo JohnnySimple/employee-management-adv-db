@@ -15,6 +15,10 @@ export default function EmployeeHome() {
     const [attendance, setAttendance] = useState([]);
     const [user, setUser] = useState(null);
     const [stats, setStats] = useState(null);
+    const [leaveStats, setLeaveStats] = useState(null);
+    const [employeeLeave, setEmployeeLeave] = useState(null);
+
+
 
     // get logged in employee from token
     useEffect(() => {
@@ -85,7 +89,73 @@ export default function EmployeeHome() {
             toast.error(`Error clocking out. ${error?.response?.data?.message}`);
         }
     }
-    
+
+    useEffect(() => {
+
+        const fetchLeaveStats = async () => {
+            try {
+                const response = await api.get(`/leaveemp/stats`);
+                setLeaveStats(response.data);
+                console.log(response.data);
+            } catch (error) {
+                console.error("Error fetching leave stats:", error);
+            }
+        };
+
+        fetchLeaveStats();
+    }, []);
+
+
+    useEffect(() => {
+    const fetchEmployeeLeave = async () => {
+        if (!user || !user.employeeId) 
+            return;
+
+        try {
+            const response = await api.get(`/employeeLeave/employee/${user.employeeId}`);
+            setEmployeeLeave(response.data);
+        } catch (error) {
+            console.error("Failed to fetch leave:", error);
+        }
+    };
+
+        fetchEmployeeLeave();
+    }, [user]);
+
+
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const thisMonthRecords = attendance?.filter(a => {
+    const recordDate = new Date(a.workDate);
+    return recordDate.getMonth() === currentMonth && 
+            recordDate.getFullYear() === currentYear;
+    }) || [];
+
+    const lastMonthRecords = attendance?.filter(a => {
+    const recordDate = new Date(a.workDate);
+    return recordDate.getMonth() === currentMonth - 1 && 
+            recordDate.getFullYear() === currentYear;
+    }) || [];
+
+
+
+    const totalDaysThisMonth = thisMonthRecords.length;
+    const totalDaysLastMonth = lastMonthRecords.length;
+
+      if (!employeeLeave || !user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="ml-4">Loading your profile...</p>
+            </div>
+        );
+    }
+
+    const totalRemaining = employeeLeave.totalRemaining;
+
+
     return (
     <div className="p-6 space-y-6">
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 via-white to-blue-50 shadow-sm border border-blue-100/50">
@@ -115,10 +185,8 @@ export default function EmployeeHome() {
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 w-fit">
                 <svg className="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <p className="text-sm text-gray-700">
-                  <span className="font-semibold text-blue-700">{stats?.activeProjectCount}</span> active projects
                 </p>
               </div>
             </div>
@@ -167,20 +235,20 @@ export default function EmployeeHome() {
         </div>
       </div>
       <Toaster />
-      <div className="flex flex-wrap gap-20 mb-6">
-        {/* generate cards to hold relevant summaries(like total employees, active projects, attendance etc) */}
+    <div className="flex flex-wrap gap-4 mb-6">
+          {/* generate cards to hold relevant summaries(like total employees, active projects, attendance etc) */}
         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
-                Attendance Rate
+                Attendance Last Month
               </CardTitle>
               <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">1</div>
+              <div className="text-2xl font-bold">{totalDaysLastMonth}</div>
               <p className="text-xs text-muted-foreground">
-                from last month
+                Days Worked Last Month
               </p>
             </CardContent>
           </Card>
@@ -190,20 +258,38 @@ export default function EmployeeHome() {
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
-                Leave Balance
+                Attendance This Month
               </CardTitle>
-              <Umbrella className="w-4 h-4 text-muted-foreground"/>
+              <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">14 days</div>
+              <div className="text-2xl font-bold">{totalDaysThisMonth}</div>
               <p className="text-xs text-muted-foreground">
-                Remaining annual leave
+                Days Worked This Month
               </p>
             </CardContent>
           </Card>
         </div>
         
         <div className="w-full sm:w-[48%] lg:w-[23%]">
+          <Card className="flex-1">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-sm font-medium">
+                Leave Balance This Year
+              </CardTitle>
+              <Umbrella className="w-4 h-4 text-muted-foreground"/>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold"> {`${employeeLeave.totalRemaining} hrs / ${employeeLeave.totalLeaveHours} hrs`}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Remaining Leave In Hours
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+        
+         <div className="w-full sm:w-[48%] lg:w-[23%]">
           <Card className="flex-1">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-medium">
@@ -214,28 +300,11 @@ export default function EmployeeHome() {
             <CardContent>
               <div className="text-2xl font-bold">{stats?.activeProjectCount ?? 0}</div>
               <p className="text-xs text-muted-foreground">
-                Active project assignments
+                Active Project Assignments
               </p>
             </CardContent>
           </Card>
-        </div>
-        
-        {/* <div className="w-full sm:w-[48%] lg:w-[23%]">
-          <Card className="flex-1">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-medium">
-                Performance
-              </CardTitle>
-              <Activity className="w-4 h-4 text-muted-foreground"/>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">0</div>
-              <p className="text-xs text-muted-foreground">
-                some info
-              </p>
-            </CardContent>
-          </Card>
-        </div> */}
+        </div> 
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 w-full">
@@ -383,8 +452,21 @@ export default function EmployeeHome() {
                 </p>
               ) : (
                 stats?.activeProjects.map((assignment: any, i: number) => {
-                  let progress = Math.floor(Math.random() * 100); // Placeholder for actual progress calculation
-                  // random color based on list of colors
+
+                const calculateProgress = (start: string, end: string) => {
+                  const startDate = new Date(start).getTime();
+                  const endDate = new Date(end).getTime();
+                  const now = new Date().getTime();
+                  if (now < startDate) return 0;
+                  if (now > endDate) return 100;
+                  const totalDuration = endDate - startDate;
+                  const elapsed = now - startDate;
+                  const percentage = Math.floor((elapsed / totalDuration) * 100);
+                  return Math.min(Math.max(percentage, 0), 100);
+                };
+
+                  const progress = calculateProgress(assignment.project.startDate, assignment.project.endDate);
+
                   const colors = ["bg-blue-500", "bg-yellow-500", "bg-red-500", "bg-green-500"];
                   const color = colors[i % colors.length];
                   

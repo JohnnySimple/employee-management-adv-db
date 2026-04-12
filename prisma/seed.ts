@@ -120,8 +120,8 @@ const employeesData = [
     { firstName: "Jane", lastName: "Smith", email: "jane@company.com", deptId: labor.deptId, titleId: constructionJunior.jobTitleId },
     { firstName: "Bob", lastName: "Brown", email: "bob@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId },
     { firstName: "Alice", lastName: "White", email: "alice@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId},
-    { firstName: "Anita", lastName: "Taylor", email: "anita@company.com", deptId: hr.deptId, titleId: constructionIntro.jobTitleId },
-    { firstName: "Mark", lastName: "Davis", email: "mark@company.com", deptId: hr.deptId, titleId: constructionIntro.jobTitleId },
+    { firstName: "Anita", lastName: "Taylor", email: "anita@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId },
+    { firstName: "Mark", lastName: "Davis", email: "mark@company.com", deptId: labor.deptId, titleId: constructionIntro.jobTitleId },
     { firstName: "Lucy", lastName: "Wilson", email: "lucy@company.com", deptId: hr.deptId, titleId: hrTitle.jobTitleId },
     { firstName: "Tom", lastName: "Clark", email: "tom@company.com", deptId: hr.deptId, titleId: hrTitle.jobTitleId },
     { firstName: "Kevin", lastName: "Lee", email: "kevin@company.com", deptId: hr.deptId, titleId: hrTitle.jobTitleId },
@@ -132,7 +132,7 @@ const createdEmployees = []
 for (const emp of employeesData) {
     const newEmp = await prisma.employee.create({
         data: {
-            firstName: emp.firstName,
+            firstName: emp.firstName,                 
             lastName: emp.lastName,
             dob: new Date("2000-01-01"),
             hireDate: new Date("2022-01-01"),
@@ -220,17 +220,17 @@ for (const e of createdEmployees) {
 // Engineering Project 1: Infrastructure
 const projectEng1 = await prisma.project.create({
     data: {
-        projectName: "Jeremy House Landscaping",
+        projectName: "Jeremy's Landscaping",
         startDate: new Date("2026-01-15"),
         endDate: new Date("2026-12-31"),
-        location: "Jeremy House - Austin"
+        location: "Jeremy's House - Austin"
     }
 })
 
 // Engineering Project 2: Innovation
 const projectEng2 = await prisma.project.create({
     data: {
-        projectName: "Irrigation System Farmlands",
+        projectName: "Irrigation System",
         startDate: new Date("2025-06-01"),
         endDate: new Date("2027-01-01"),
         location: "Rural Farmlands - Texas"
@@ -240,7 +240,7 @@ const projectEng2 = await prisma.project.create({
 // HR Project 1: Culture
 const projectHr1 = await prisma.project.create({
     data: {
-        projectName: "Employee Wellness Initiative",
+        projectName: "Employee Wellness",
         startDate: new Date("2026-01-01"),
         endDate: new Date("2026-12-31"),
         location: "Main Office - Austin"
@@ -250,7 +250,7 @@ const projectHr1 = await prisma.project.create({
 // HR Project 2: Systems
 const projectHr2 = await prisma.project.create({
     data: {
-        projectName: "Talent Acquisition Overhaul",
+        projectName: "Acquisition Overhaul",
         startDate: new Date("2025-06-01"),
         endDate: new Date("2027-06-01"),
         location: "Main Office - Austin"
@@ -350,7 +350,7 @@ for (let i = 1; i < 43; i++) {
 
     const jitterMinutes = Math.floor(rng() * 30) - 15;
     
-    const tempIn = new Date(`${datePart}T05:00:00.000Z`);
+    const tempIn = new Date(`${datePart}T09:00:00`);
     tempIn.setMinutes(tempIn.getMinutes() + jitterMinutes);
     const tempOut = new Date(tempIn.getTime() + (totalHoursForDay * 3600000));
 
@@ -401,8 +401,8 @@ for (let i = 1; i <= 12; i++) {
             attendanceRecords.push({
                 employeeId: emp.employeeId,
                 workDate: new Date(monthDate),
-                timeIn: new Date(`${dateString}T01:00:00`),
-                timeOut: new Date(`${dateString}T09:00:00`),
+                timeIn: new Date(`${dateString}T09:00:00`),
+                timeOut: new Date(`${dateString}T17:00:00`),
                 hoursWorked: Math.floor(baseTarget),
                 overtimeHours: Math.floor(otTarget)
             });
@@ -424,13 +424,16 @@ const today: Date = new Date();
 const tomorrow: Date = new Date();
 tomorrow.setDate(today.getDate() + 1);
 
-// 2. Data Array
 const leaveData = [
     { emp: constManager, start: "2026-02-10", end: "2026-02-15", hours: 40, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[0], start: "2026-01-05", end: "2026-01-10", hours: 40, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[1], start: "2026-03-12", end: "2026-03-14", hours: 24, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[4], start: "2026-02-07", end: "2026-02-08", hours: 8, status: "Approved", type: sick.leaveId },
     { emp: hrManager, start: "2026-06-15", end: "2026-06-20", hours: 40, status: "Approved", type: pto.leaveId },
+    { emp: hrManager, start: "2026-02-02", end: "2026-02-03", hours: 16, status: "Approved", type: sick.leaveId },
+    { emp: hrManager, start: "2026-04-12", end: "2026-04-12", hours: 8, status: "Approved", type: pto.leaveId },
+    { emp: hrManager, start: "2026-12-23", end: "2026-12-25", hours: 24, status: "Pending", type: pto.leaveId },
+
     { emp: createdEmployees[5], start: "2026-05-20", end: "2026-05-25", hours: 40, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[2], start: "2026-08-10", end: "2026-08-13", hours: 24, status: "Pending", type: pto.leaveId },
     { emp: createdEmployees[6], start: "2026-09-01", end: "2026-09-03", hours: 16, status: "Pending", type: pto.leaveId },
@@ -440,19 +443,40 @@ const leaveData = [
     { emp: createdEmployees[7], start: "2026-07-01", end: "2026-07-02", hours: 8, status: "Approved", type: sick.leaveId },
 ];
 
-// 3. Logic Loop
-for (const leave of leaveData) {
-    const hoursToDeduct = leave.status === "Approved" ? leave.hours : 0;
-    const currentLeaveId = leave.type ?? pto.leaveId;
+const balances: { [key: number]: number } = {};
 
-    const empLeave = await prisma.employeeLeave.create({
-        data: {
-            employeeId: leave.emp.employeeId,
-            leaveId: currentLeaveId,
-            totalLeaveHours: 80,
-            totalRemaining: 80 - hoursToDeduct,
-            status: leave.status 
+for (const leave of leaveData) {
+    const empId = leave.emp.employeeId;
+    const currentLeaveId = leave.type ?? pto.leaveId;
+    const hoursToDeduct = (leave.status === "Approved" || leave.status === "Pending") ? leave.hours : 0;
+
+    if (!balances[empId]) {
+        balances[empId] = 120;
+    }
+    balances[empId] -= hoursToDeduct;
+
+    let empLeave = await prisma.employeeLeave.findFirst({
+        where: {
+            employeeId: empId,
+            leaveId: currentLeaveId
         }
+    });
+
+    if (!empLeave) {
+        empLeave = await prisma.employeeLeave.create({
+            data: {
+                employeeId: empId,
+                leaveId: currentLeaveId,
+                totalLeaveHours: 120,
+                totalRemaining: balances[empId],
+                status: leave.status
+            }
+        });
+    }
+
+    await prisma.employeeLeave.updateMany({
+        where: { employeeId: empId },
+        data: { totalRemaining: balances[empId] }
     });
 
     await prisma.leaveDate.create({

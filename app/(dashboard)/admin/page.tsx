@@ -1,13 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Users } from "lucide-react";
+import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
+import { Users, FolderOpen } from "lucide-react";
 import api from "@/lib/api";
 import { AdminStats } from "@/types/AdminStats";
 import TestChart from "@/components/admin/test-chart";
 import EmployeeClockInTable from "@/components/admin/employee-clockin-table";
 import TotalHoursWorkedChart from "@/components/admin/total-hours-worked-chart";
+import { Badge, Clock, Loader, CalendarCheck2, Umbrella, Briefcase, Activity, Building2 } from "lucide-react";
+
+
 
 
 export default function AdminHome() {
@@ -41,6 +44,7 @@ export default function AdminHome() {
     fetchHoursWorked();
   }, []);
 
+
   return (
     // <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans">
     //   Admin home dashboard
@@ -72,7 +76,7 @@ export default function AdminHome() {
               <CardTitle className="text-sm font-medium">
                 Projects
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
+              <Briefcase className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.projects.length}</div>
@@ -89,7 +93,7 @@ export default function AdminHome() {
               <CardTitle className="text-sm font-medium">
                 Departments
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
+              <Building2 className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.departmentCount}</div>
@@ -106,7 +110,7 @@ export default function AdminHome() {
               <CardTitle className="text-sm font-medium">
                 Clocked In Today
               </CardTitle>
-              <Users className="w-4 h-4 text-muted-foreground" />
+              <Clock className="w-4 h-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats?.checkedInEmployeeCount}</div>
@@ -149,6 +153,7 @@ export default function AdminHome() {
             </CardContent>
           </Card>
         </div>
+
       </div>
     </div>
   );

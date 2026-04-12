@@ -6,6 +6,7 @@ import { ChartBar } from "lucide-react";
 import api from "@/lib/api";
 import SalaryHistoryTable from "@/components/employee/salary-history-table";
 
+
 export default function EmployeePayroll() {
 
     const [salaries, setSalaries] = useState(null);
@@ -90,7 +91,7 @@ export default function EmployeePayroll() {
                     <CardContent className="space-y-6">
                     {/* Clock In/Out Buttons */}
                     {/* <div className="flex gap-3"> */}
-                        <SalaryHistoryTable history={salaries} />
+                    <SalaryHistoryTable history={salaries} attendance={attendance} />
                     {/* </div> */}
                     </CardContent>
                 </Card>

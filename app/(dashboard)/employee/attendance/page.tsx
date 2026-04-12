@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card";
 import api from "@/lib/api";
 import AttendanceHistoryTable from "@/components/employee/attendance-history-table";
-import { Hourglass, Clock, Play, Square } from "lucide-react";
+import { Hourglass, Clock, Play, Square, Briefcase, Umbrella, CalendarCheck2, Activity } from "lucide-react";
 
 export default function EmployeeAttendance() {
 
@@ -32,81 +32,118 @@ export default function EmployeeAttendance() {
         return `${h12}:${m.toString().padStart(2, "0")} ${period}`;
     }
 
-    const totalHours = attendance?.reduce((sum, a) => sum + (a.hoursWorked || 0) + (a.overtimeHours || 0), 0);
-    const averageWorkingHours = attendance?.reduce((sum, a) => sum + (a.hoursWorked || 0), 0) / (attendance?.length || 1);
+    
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    const thisMonthRecords = attendance?.filter(a => {
+    const recordDate = new Date(a.workDate);
+    return recordDate.getMonth() === currentMonth && 
+            recordDate.getFullYear() === currentYear;
+    }) || [];
+
+    const averageWorkingHoursthisMonth = thisMonthRecords.reduce((sum, a) => 
+    sum + (a.hoursWorked || 0), 0) / (thisMonthRecords.length || 1);
+
+
+    const totalHoursThisMonth = thisMonthRecords?.reduce((sum, a) => sum + (a.hoursWorked || 0) + (a.overtimeHours || 0), 0);
+    
 
     const getMinutes = (date: Date) => {
         date = new Date(date);
         return date.getHours() * 60 + date.getMinutes();
     }
-    const averageCheckInMinutes = attendance?.reduce((sum, a) => sum + getMinutes(a.timeIn), 0) / (attendance?.length || 1);
+
+    const totalMinutesTimeIn = thisMonthRecords.reduce((sum, a) => {
+    return sum + getMinutes(a.timeIn);
+    }, 0);
+
+    const avgMinutesTimeIn = totalMinutesTimeIn / (thisMonthRecords.length || 1);
+
+
+    const totalMinutesTimeOut = thisMonthRecords.reduce((sum, a) => {
+    return sum + getMinutes(a.timeOut);
+    }, 0);
+
+    const avgMinutesTimeOut = totalMinutesTimeOut / (thisMonthRecords.length || 1);
+
+
+
+    // const averageCheckInTime = thisMonthRecords?.reduce((sum, a) => sum + getMinutes(a.timeIn), 0) / (attendance?.length || 1);
     // const averageCheckIn = `${Math.floor(averageCheckInMinutes / 60)
     //     .toString().padStart(2, "0")}:${Math.floor(averageCheckInMinutes % 60).toString().padStart(2, "0")}`;
-    const averageCheckIn = formatTime(averageCheckInMinutes);
+    const avgerageCheckIn = formatTime(avgMinutesTimeIn);
 
-    const validCheckouts = attendance?.filter(a => a.timeOut);
-    const averageCheckOutMinutes = validCheckouts?.reduce((sum, a) => sum + getMinutes(a.timeOut), 0) / (attendance?.length || 1);
+    //const validCheckouts = thisMonthRecords?.filter(a => a.timeOut);
+    // const averageCheckOutMinutes = validCheckouts?.reduce((sum, a) => sum + getMinutes(a.timeOut), 0) / (attendance?.length || 1);
     // const averageCheckOut = `${Math.floor(averageCheckOutMinutes / 60)
     //     .toString().padStart(2, "0")}:${Math.floor(averageCheckOutMinutes % 60).toString().padStart(2, "0")}`;
-    const averageCheckOut = formatTime(averageCheckOutMinutes);
+    const averageCheckOut = formatTime(avgMinutesTimeOut);
 
     
 
     return (
         <div className="p-6 space-y-6">
-            <div className="flex flex-wrap items-center justify-between mb-6 bg-white rounded-2xl p-4 shadow-sm">
+    {/* Corrected container: flex-wrap + gap-4 is the secret sauce */}
+    <div className="flex flex-wrap gap-4 mb-6">
+        
+        {/* Card 1 */}
+        <div className="w-full sm:w-[48%] lg:w-[23%]">
+            <Card className="h-full">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium">Total Hours Worked</CardTitle>
+                    <CalendarCheck2 className="w-4 h-4 text-muted-foreground"/>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{totalHoursThisMonth?.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">This Month</p>
+                </CardContent>
+            </Card>
+        </div>
 
-                {/* Item */}
-                <div className="flex items-center gap-4 px-4">
-                    <div className="p-3 rounded-xl bg-purple-100">
-                        {/* replace with Activity if needed */}
-                        <Hourglass className="w-7 h-7 text-purple-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-muted-foreground">Total Hours</h1>
-                        <p className="text-xl font-semibold">{ totalHours?.toFixed(2) }</p>
-                    </div>
-                </div>
+        {/* Card 2 */}
+        <div className="w-full sm:w-[48%] lg:w-[23%]">
+            <Card className="h-full">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium">Average Working Hours</CardTitle>
+                    <Hourglass className="w-4 h-4 text-muted-foreground"/>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{averageWorkingHoursthisMonth?.toFixed(2)}</div>
+                    <p className="text-xs text-muted-foreground">This Month</p>
+                </CardContent>
+            </Card>
+        </div>
 
-                <div className="hidden lg:block h-10 w-px bg-gray-200" />
+        {/* Card 3 */}
+        <div className="w-full sm:w-[48%] lg:w-[23%]">
+            <Card className="h-full">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium">Average Clock In Time</CardTitle>
+                    <Clock className="w-4 h-4 text-muted-foreground"/>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{avgerageCheckIn}</div>
+                    <p className="text-xs text-muted-foreground">This Month</p>
+                </CardContent>
+            </Card>
+        </div>
 
-                {/* Item */}
-                <div className="flex items-center gap-4 px-4">
-                    <div className="p-3 rounded-xl bg-blue-100">
-                        <Clock className="w-7 h-7 text-blue-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-muted-foreground">Average Working Hours</h1>
-                        <p className="text-xl font-semibold">{ averageWorkingHours?.toFixed(2) }</p>
-                    </div>
-                </div>
-
-                <div className="hidden lg:block h-10 w-px bg-gray-200" />
-
-                {/* Item */}
-                <div className="flex items-center gap-4 px-4">
-                    <div className="p-3 rounded-xl bg-green-100">
-                        <Play className="w-7 h-7 text-green-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-muted-foreground">Average Clock In Time</h1>
-                        <p className="text-xl font-semibold">{ averageCheckIn }</p>
-                    </div>
-                </div>
-
-                <div className="hidden lg:block h-10 w-px bg-gray-200" />
-
-                {/* Item */}
-                <div className="flex items-center gap-4 px-4">
-                    <div className="p-3 rounded-xl bg-orange-100">
-                        <Square className="w-7 h-7 text-orange-600" />
-                    </div>
-                    <div>
-                        <h1 className="text-muted-foreground">Average Clock Out Time</h1>
-                        <p className="text-xl font-semibold">{ averageCheckOut }</p>
-                    </div>
-                </div>
-            </div>
+        {/* Card 4 */}
+        <div className="w-full sm:w-[48%] lg:w-[23%]">
+            <Card className="h-full">
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <CardTitle className="text-sm font-medium">Average Clock Out Time</CardTitle>
+                    <Clock className="w-4 h-4 text-muted-foreground"/>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">{averageCheckOut}</div>
+                    <p className="text-xs text-muted-foreground">This Month</p>
+                </CardContent>
+            </Card>
+        </div>
+    </div>
             <div className="flex flex-col lg:flex-row gap-6 w-full">
                 {/* Time Logging Card */}
                 <div className="flex-1">

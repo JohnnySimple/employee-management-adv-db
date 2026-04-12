@@ -32,7 +32,7 @@ export async function middleware(req: NextRequest) {
 
         // protect employee routes
         if (path.startsWith("/employee") && role !== "EMPLOYEE") {
-            return NextResponse.redirect(new URL("/manager", req.url))
+            return NextResponse.redirect(new URL("/admin", req.url))
         }
 
         // protect manager routes

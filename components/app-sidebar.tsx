@@ -16,6 +16,7 @@ import { Building2, Clock, DollarSign, FileText, LayoutDashboard, LogOut, Settin
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import {getLinkClasses}  from "@/components/admin/getLinkClasses/getLinkClasses";
+import Logo from "employee-management-adv-db/public/UI_Construction_Logo_No_Words.png";
 
 export function AppSidebar() {
 
@@ -28,8 +29,17 @@ export function AppSidebar() {
 
     return (
         <Sidebar>
-            <SidebarHeader className="p-4 text-lg font-semibold">
+            <SidebarHeader className="p-4 flex flex-row items-center gap-3">
+            <img 
+        src="/UI_Construction_Logo_No_Words.png" 
+        alt="Logo" 
+        className="h-18 w-18 object-contain" 
+            />
+            
+            <span className="text-xl font-semibold tracking-tight">
                 Admin
+
+            </span>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
