@@ -452,8 +452,21 @@ export default function EmployeeHome() {
                 </p>
               ) : (
                 stats?.activeProjects.map((assignment: any, i: number) => {
-                  let progress = Math.floor(Math.random() * 100); // Placeholder for actual progress calculation
-                  // random color based on list of colors
+
+                const calculateProgress = (start: string, end: string) => {
+                  const startDate = new Date(start).getTime();
+                  const endDate = new Date(end).getTime();
+                  const now = new Date().getTime();
+                  if (now < startDate) return 0;
+                  if (now > endDate) return 100;
+                  const totalDuration = endDate - startDate;
+                  const elapsed = now - startDate;
+                  const percentage = Math.floor((elapsed / totalDuration) * 100);
+                  return Math.min(Math.max(percentage, 0), 100);
+                };
+
+                  const progress = calculateProgress(assignment.project.startDate, assignment.project.endDate);
+
                   const colors = ["bg-blue-500", "bg-yellow-500", "bg-red-500", "bg-green-500"];
                   const color = colors[i % colors.length];
                   

@@ -220,17 +220,17 @@ for (const e of createdEmployees) {
 // Engineering Project 1: Infrastructure
 const projectEng1 = await prisma.project.create({
     data: {
-        projectName: "Jeremy House Landscaping",
+        projectName: "Jeremy's Landscaping",
         startDate: new Date("2026-01-15"),
         endDate: new Date("2026-12-31"),
-        location: "Jeremy House - Austin"
+        location: "Jeremy's House - Austin"
     }
 })
 
 // Engineering Project 2: Innovation
 const projectEng2 = await prisma.project.create({
     data: {
-        projectName: "Irrigation System Farmlands",
+        projectName: "Irrigation System",
         startDate: new Date("2025-06-01"),
         endDate: new Date("2027-01-01"),
         location: "Rural Farmlands - Texas"
@@ -240,7 +240,7 @@ const projectEng2 = await prisma.project.create({
 // HR Project 1: Culture
 const projectHr1 = await prisma.project.create({
     data: {
-        projectName: "Employee Wellness Initiative",
+        projectName: "Employee Wellness",
         startDate: new Date("2026-01-01"),
         endDate: new Date("2026-12-31"),
         location: "Main Office - Austin"
@@ -250,7 +250,7 @@ const projectHr1 = await prisma.project.create({
 // HR Project 2: Systems
 const projectHr2 = await prisma.project.create({
     data: {
-        projectName: "Talent Acquisition Overhaul",
+        projectName: "Acquisition Overhaul",
         startDate: new Date("2025-06-01"),
         endDate: new Date("2027-06-01"),
         location: "Main Office - Austin"
@@ -430,7 +430,7 @@ const leaveData = [
     { emp: createdEmployees[1], start: "2026-03-12", end: "2026-03-14", hours: 24, status: "Approved", type: pto.leaveId },
     { emp: createdEmployees[4], start: "2026-02-07", end: "2026-02-08", hours: 8, status: "Approved", type: sick.leaveId },
     { emp: hrManager, start: "2026-06-15", end: "2026-06-20", hours: 40, status: "Approved", type: pto.leaveId },
-    { emp: hrManager, start: "2026-05-7", end: "2026-05-8", hours: 16, status: "Approved", type: pto.leaveId },
+    { emp: hrManager, start: "2026-02-02", end: "2026-02-03", hours: 16, status: "Approved", type: sick.leaveId },
     { emp: hrManager, start: "2026-04-12", end: "2026-04-12", hours: 8, status: "Approved", type: pto.leaveId },
     { emp: hrManager, start: "2026-12-23", end: "2026-12-25", hours: 24, status: "Pending", type: pto.leaveId },
 
@@ -448,7 +448,7 @@ const balances: { [key: number]: number } = {};
 for (const leave of leaveData) {
     const empId = leave.emp.employeeId;
     const currentLeaveId = leave.type ?? pto.leaveId;
-    const hoursToDeduct = leave.status === "Approved" ? leave.hours : 0;
+    const hoursToDeduct = (leave.status === "Approved" || leave.status === "Pending") ? leave.hours : 0;
 
     if (!balances[empId]) {
         balances[empId] = 120;
@@ -463,7 +463,6 @@ for (const leave of leaveData) {
     });
 
     if (empLeave) {
-        // 2. If it exists, update it
         empLeave = await prisma.employeeLeave.update({
             where: { employeeLeaveId: empLeave.employeeLeaveId },
             data: { totalRemaining: balances[empId] }
