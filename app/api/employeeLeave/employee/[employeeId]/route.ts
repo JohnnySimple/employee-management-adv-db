@@ -55,12 +55,10 @@ export async function PATCH(req: Request, context: { params: { employeeId: strin
             return NextResponse.json({ error: "Leave record not found" }, { status: 404 });
         }
 
-        // 2. Logic: If we are subtracting hours (e.g., approving a request)
         if (data.hoursToSubtract !== undefined) {
             const deduction = parseFloat(data.hoursToSubtract);
             const newRemaining = currentRecord.totalRemaining - deduction;
 
-            // PREVENT NEGATIVE BALANCE
             if (newRemaining < 0) {
                 return NextResponse.json(
                     { 
@@ -71,6 +69,20 @@ export async function PATCH(req: Request, context: { params: { employeeId: strin
                     { status: 400 }
                 );
             }
+
+            // Update the record with the calculated balance
+            const updated = await prisma.employeeLeave.update({
+                where: { employeeLeaveId: currentRecord.employeeLeaveId },
+                data: { totalRemaining: newRemaining }
+            });
+
+            return NextResponse.json(updated);
+        }
+
+
+        if (data.hoursToAdd !== undefined) {
+            const addition = parseFloat(data.hoursToAdd);
+            const newRemaining = currentRecord.totalRemaining + addition;
 
             // Update the record with the calculated balance
             const updated = await prisma.employeeLeave.update({

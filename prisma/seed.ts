@@ -462,12 +462,7 @@ for (const leave of leaveData) {
         }
     });
 
-    if (empLeave) {
-        empLeave = await prisma.employeeLeave.update({
-            where: { employeeLeaveId: empLeave.employeeLeaveId },
-            data: { totalRemaining: balances[empId] }
-        });
-    } else {
+    if (!empLeave) {
         empLeave = await prisma.employeeLeave.create({
             data: {
                 employeeId: empId,
@@ -478,6 +473,11 @@ for (const leave of leaveData) {
             }
         });
     }
+
+    await prisma.employeeLeave.updateMany({
+        where: { employeeId: empId },
+        data: { totalRemaining: balances[empId] }
+    });
 
     await prisma.leaveDate.create({
         data: {
