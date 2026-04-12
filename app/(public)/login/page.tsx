@@ -45,8 +45,6 @@ export default function Loginpage() {
                 router.push("/admin")
             } else if (role === "EMPLOYEE") {
                 router.push("/employee")
-            } else if (role === "MANAGER") {
-                router.push("/manager")
             } else {
                 router.push("/")
             }
@@ -60,6 +58,13 @@ export default function Loginpage() {
         <div className="flex items-center justify-center min-h-screen">
             <Card className="w-[400px]">
                 <CardHeader className="text-center">
+                    <div className="flex justify-center mb-4">
+                <img 
+                    src="/UI_Construction_Logo.png" 
+                    alt="Logo" 
+                    className="h-48 w-auto object-contain" 
+                />
+                </div>
                     <CardTitle>Welcome</CardTitle>
                     <CardDescription>Login to your account</CardDescription>
                 </CardHeader>

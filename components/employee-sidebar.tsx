@@ -28,8 +28,15 @@ export function EmployeeSidebar() {
 
     return (
         <Sidebar>
-            <SidebarHeader className="p-4 text-lg font-semibold">
+        <SidebarHeader className="p-4 flex flex-row items-center gap-3">
+            <img 
+                src="/UI_Construction_Logo_No_Words.png" 
+                alt="Logo" 
+                className="h-18 w-18 object-contain" 
+            />  
+            <span className="text-xl font-semibold tracking-tight">
                 Employee
+            </span>
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
