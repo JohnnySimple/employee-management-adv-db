@@ -33,6 +33,11 @@ import { getLeaveRecords } from "./attendancerecords/getLeaveRecords";
 import { toast } from "sonner";
 import api from "@/lib/api";
 
+const MONTH_ORDER = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
+
 // Design an Interface which matches the attendance record structure\
 interface LeaveRecord {
     leaveDate: number,
@@ -46,18 +51,11 @@ interface LeaveRecord {
 }
 
 const COLORS = {
-    primary: "#111827",
-    secondary: "#374151",
-    tertiary: "#6b7280",
-
-    barPalette: [
-        "#2563eb", // blue
-        "#f97316", // orange
-        "#10b981", // green
-        "#ef4444", // red
-        "#a855f7"  // purple
-    ]
+    pto: "#2563eb",
+    sick: "#ef4444",
+    remaining: "#e5e7eb"
 };
+const TOTAL_HOURS = 120;
 
 export default function AdminLeavePage() {
     const [search, setSearch] = useState("");
@@ -134,15 +132,11 @@ export default function AdminLeavePage() {
     // const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const today = new Date();
 
-    const cutoffDate = new Date(today);
-    cutoffDate.setDate(today.getDate() - 90);
-
-
     const approvedCount = leaveData.filter((r) => r.leaveDateStatus === "Approved").length;
     const pendingCount = leaveData.filter((r) => r.leaveDateStatus === "Pending").length;
     // const rejectedCount = leaveData.filter((r) => r.leaveDateStatus === "Rejected").length;
     //Upcoming Leaves
-     const upcomingLeaves = leaveData.filter(r =>
+    const upcomingLeaves = leaveData.filter(r =>
         r.leaveDateStatus === "Approved" &&
         new Date(r.startDate) >= today
     ).length;
@@ -154,15 +148,6 @@ export default function AdminLeavePage() {
             new Date(r.endDate) >= today &&
             r.leaveDateStatus === "Approved"
     ).length;
-
-      const approvedRecentCount = leaveData.filter(r => {
-        const start = new Date(r.startDate);
-        return (
-            r.leaveDateStatus === "Approved" &&
-            start >= cutoffDate &&
-            start <= today
-        );
-    }).length;
 
 
     // Leave Type Map
@@ -187,26 +172,25 @@ export default function AdminLeavePage() {
     // ];
 
     // Monthly Leave Trends (Leaves per month)
-      const monthlyTypeMap: Record<string, Record<string, number>> = {};
+    const monthlyTypeMap: Record<string, Record<string, any>> = {};
 
     leaveData.forEach(r => {
-        const month = new Date(r.startDate).toLocaleString("default", {
-            month: "short"
-        });
+        if (r.leaveDateStatus !== "Approved") return;
 
-        if (r.leaveDateStatus === "Approved") {
-            if (!monthlyTypeMap[month]) monthlyTypeMap[month] = {};
-            if (!monthlyTypeMap[month][r.leaveType]) {
-                monthlyTypeMap[month][r.leaveType] = 0;
-            }
-            monthlyTypeMap[month][r.leaveType]++;
+        const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
+
+        if (!monthlyTypeMap[month]) {
+            monthlyTypeMap[month] = { name: month, PTO: 0, Sick: 0 };
+        }
+
+        if (r.leaveType.toLowerCase().includes("sick")) {
+            monthlyTypeMap[month].Sick += 1;
+        } else {
+            monthlyTypeMap[month].PTO += 1;
         }
     });
 
-    let monthlyTypeData = Object.keys(monthlyTypeMap).map(month => ({
-        name: month,
-        ...monthlyTypeMap[month]
-    }));
+    let monthlyTypeData = MONTH_ORDER.filter((month) => monthlyTypeMap[month]).map((month) => monthlyTypeMap[month]);
 
     if (monthSearch) {
         monthlyTypeData = monthlyTypeData.filter(m =>
@@ -214,40 +198,41 @@ export default function AdminLeavePage() {
         );
     }
 
-     const leaveTypes = Array.from(
+    const leaveTypes = Array.from(
         new Set(leaveData.map(r => r.leaveType))
     );
-    // const monthlyMap: Record<string, number> = {};
-    // leaveData.forEach((r) => {
-    //     const month = new Date(r.startDate).toLocaleString("default", { month: "short" });
-    //     monthlyMap[month] = (monthlyMap[month] || 0) + 1;
-    // })
-
-    // const monthlyData = Object.keys(monthlyMap).map(key => ({
-    //     name: key,
-    //     value: monthlyMap[key]
-    // }));
 
     // Top Employees with most leaves
-   const empMap: Record<string, number> = {};
+    const empHoursMap: Record<string, number> = {};
 
     leaveData.forEach(r => {
         if (r.leaveDateStatus === "Approved") {
-            empMap[r.employeeName] =
-                (empMap[r.employeeName] || 0) + 1;
+            empHoursMap[r.employeeName] =
+                (empHoursMap[r.employeeName] || 0) + r.hoursOff;
         }
     });
 
-    let employeeChartData = Object.entries(empMap)
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
-        if (employeeSearch) {
-            employeeChartData = employeeChartData.filter(e =>
-                e.name.toLowerCase().includes(employeeSearch.toLowerCase())
-            );
-        }
+    let employeeChartData = Object.entries(empHoursMap)
+        .map(([name, used]) => {
+            const total = TOTAL_HOURS;
+            const remaining = Math.max(total - used, 0);
+            const utilization = (used / total) * 100;
 
+            return {
+                name,
+                used,
+                remaining,
+                total,
+                utilization: Number(utilization.toFixed(1))
+            };
+        })
+        .sort((a, b) => b.used - a.used);
+
+    if (employeeSearch) {
+        employeeChartData = employeeChartData.filter(e =>
+            e.name.toLowerCase().includes(employeeSearch.toLowerCase())
+        );
+    }
 
     const filteredData = leaveData.filter((row) =>
         row.employeeName.toLowerCase().includes(search.toLowerCase())
@@ -309,7 +294,7 @@ export default function AdminLeavePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="Tracking-widest font-bold">On Leave</CardTitle>
-                        
+
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
@@ -323,28 +308,28 @@ export default function AdminLeavePage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="tracking-widest font-bold">Upcoming Leaves</CardTitle>
-                        
+
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <Calendar className="w-6 h-6 text-blue-500" />
                             <span className="tracking-wide text-xl font-bold">{upcomingLeaves}</span>
                         </div>
-                        <p className="text-sm text-muted-foreground">Planned leave in the next 30 days</p>
+                        <p className="text-sm text-muted-foreground">Scheduled Approved Leaves</p>
                     </CardContent>
                 </Card>
                 {/* Appproved Leaves Count */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="Tracking-widest font-bold">YTD (Last 90 days)</CardTitle>
-                        
+                        <CardTitle className="Tracking-widest font-bold">YTD Approved</CardTitle>
+
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center gap-2">
                             <UserCheck className="w-6 h-6 text-blue-500" />
-                            <span className="tracking-wide text-xl font-bold">{approvedRecentCount}</span>
+                            <span className="tracking-wide text-xl font-bold">{approvedCount}</span>
                         </div>
-                        <p className="text-sm text-muted-foreground">Recent leave activity</p>
+                        <p className="text-sm text-muted-foreground">Total Approved Leaves</p>
                     </CardContent>
                 </Card>
                 {/* Average Hours Off
@@ -437,60 +422,126 @@ export default function AdminLeavePage() {
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* Monthly Leave Type */}
-                <Card className="border border-gray-300 rounded-md">
-                    <CardHeader><CardTitle className="tracking-widest font-bold">Monthly Leave Distribution</CardTitle>
-                        <p className="tracking-wide text-gray-500">Leave type breakdown per month data</p>
-                        <div className="mt-2 flex items-center gap-2">
-                            <Input placeholder="Filter by month" value={monthSearch} onChange={(e) => setMonthSearch(e.target.value)} className="input" />
-                            {monthSearch && <Button size="sm" onClick={() => setMonthSearch("")}>Clear</Button>}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Monthly Leave Distribution</CardTitle>
+                        <div className="w-full focus:h-1">
+                            <Input placeholder="Filter By Month" value={monthSearch} onChange={(e) => setMonthSearch(e.target.value)} />
+                            {monthSearch && <Button variant="ghost" size="icon" onClick={() => setMonthSearch("")} className="absolute right-2 top-1" />}
                         </div>
                     </CardHeader>
-                    <CardContent className="h-72">
-                        <ResponsiveContainer width="100%" height="100%">
+
+                    <CardContent className="h-80 overflow-x-auto">
+                        <ResponsiveContainer>
                             <BarChart data={monthlyTypeData}>
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
+                                <XAxis dataKey="name"
+                                    angle={-25}
+                                    textAnchor="end"
+                                    interval={0} />
                                 <YAxis />
                                 <ReTooltip />
                                 <Legend />
-                                {leaveTypes.map((type, idx) => (
-                                    <Bar key={type} dataKey={type} stackId="a" fill={COLORS.barPalette[idx % COLORS.barPalette.length]} />
-                                ))}
+
+                                <Bar dataKey="PTO" stackId="a" fill={COLORS.pto} maxBarSize={20} />
+                                <Bar dataKey="Sick" stackId="a" fill={COLORS.sick} maxBarSize={20} />
+
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
 
-                {/* Merged Top Employees & Duration */}
-                    <Card>
+
+                {/* Employee Leave Utilization */}
+                <Card>
                     <CardHeader>
-                        <CardTitle className="font-bold tracking-widest">Top Employees (Approved Leaves)</CardTitle>
+                        <CardTitle>Employee Leave Utilization</CardTitle>
                         <p className="text-xs text-muted-foreground">
-                            Employees with highest leave frequency
+                            Used vs Remaining (120 hrs cap per employee)
                         </p>
-                        <div className="mt-2 flex w-full items-center gap-2">
-                            <Input placeholder="Search Employee" value={employeeSearch} onChange={(e) => setEmployeeSearch(e.target.value)} className="input" />
-                            {employeeSearch && <Button size="sm" onClick={() => setEmployeeSearch("")}>Clear</Button>}
+
+                        <div className="w-full relative">
+                            <Input
+                                placeholder="Filter By Employee"
+                                value={employeeSearch}
+                                onChange={(e) => setEmployeeSearch(e.target.value)}
+                            />
+                            {employeeSearch && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setEmployeeSearch("")}
+                                    className="absolute right-2 top-1"
+                                />
+                            )}
                         </div>
                     </CardHeader>
 
-                    <CardContent className="h-72">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={employeeChartData}>
+                    <CardContent className="h-[500px] overflow-y-auto">
+                        <ResponsiveContainer width="100%" height={450}>
+                            <BarChart
+                                data={employeeChartData}
+                                margin={{ top: 20, right: 20, left: 10, bottom: 80 }}
+                            >
                                 <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="name" />
-                                <YAxis />
-                                <ReTooltip />
 
+                                <XAxis
+                                    dataKey="name"
+                                    interval={0}
+                                    angle={-35}
+                                    textAnchor="end"
+                                    height={80}
+                                />
+
+                                <YAxis />
+
+                                <ReTooltip
+                                    formatter={(value: number, name: string, props: any) => {
+                                        const { used, remaining, total, utilization } = props.payload;
+
+                                        if (name === "used") return [`${value} hrs used`, "Used Leave"];
+                                        if (name === "remaining") return [`${value} hrs remaining`, "Remaining Leave"];
+
+                                        return [value, name];
+                                    }}
+                                    labelFormatter={(label) => `Employee: ${label}`}
+                                    content={({ active, payload, label }) => {
+                                        if (!active || !payload?.length) return null;
+
+                                        const data = payload[0].payload;
+
+                                        return (
+                                            <div className="bg-white border rounded-lg p-3 shadow-md text-sm">
+                                                <p className="font-semibold mb-2">{data.name}</p>
+
+                                                <p>Total Entitlement:{data.total} hrs</p>
+                                                <p>Used:{data.used} hrs</p>
+                                                <p>Remaining:{data.remaining} hrs</p>
+                                                <p>Utilization:{data.utilization}%</p>
+                                            </div>
+                                        );
+                                    }}
+                                />
+
+                                {/* USED */}
                                 <Bar
-                                    dataKey="count"
-                                    fill={COLORS.barPalette[0]}
+                                    dataKey="used"
+                                    stackId="a"
+                                    fill={COLORS.pto}
+                                    maxBarSize={16}
+                                />
+
+                                {/* REMAINING */}
+                                <Bar
+                                    dataKey="remaining"
+                                    stackId="a"
+                                    fill={COLORS.remaining}
+                                    maxBarSize={16}
                                 />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>
                 </Card>
-
             </div>
         </div>
     )
