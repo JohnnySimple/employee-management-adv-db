@@ -457,7 +457,7 @@ export default function AdminLeavePage() {
                     <CardHeader>
                         <CardTitle>Employee Leave Utilization</CardTitle>
                         <p className="text-xs text-muted-foreground">
-                            Used vs Remaining (120 hrs cap per employee)
+                            Used vs Remaining leave hours based on a {TOTAL_HOURS} hr entitlement
                         </p>
 
                         <div className="w-full relative">
