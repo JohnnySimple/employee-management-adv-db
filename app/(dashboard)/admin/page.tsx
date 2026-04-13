@@ -98,7 +98,7 @@ export default function AdminHome() {
             <CardContent>
               <div className="text-2xl font-bold">{stats?.departmentCount}</div>
               <p className="text-xs text-muted-foreground">
-                All Inclusive
+                {stats?.departmentCount} active
               </p>
             </CardContent>
           </Card>
