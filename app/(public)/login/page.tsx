@@ -36,19 +36,22 @@ export default function Loginpage() {
     });
 
     const onSubmit = async (data: FormData) => {
-        
+        setIsLoading(true);
         try {
             const res = await axios.post("/api/auth/login", data)
             const { role } = res.data.user
 
             if (role === "ADMIN") {
+                setIsLoading(false);
                 router.push("/admin")
             } else if (role === "EMPLOYEE") {
+                setIsLoading(false);    
                 router.push("/employee")
             } else {
                 router.push("/")
             }
         } catch (error: any) {
+            setIsLoading(false);
             // console.error(error)
             alert(error.response?.data?.error || "Login failed")
         }
@@ -96,9 +99,16 @@ export default function Loginpage() {
                         </div>
                     </CardContent>
                     <CardFooter className="mt-8">
-                        <Button type="submit" className="w-full">
-                            {isLoading ? "Logging in..." : "Login"}
+                    { isLoading ? (
+                        <Button type="submit" className="w-full text-muted-foreground" disabled>
+                           Logging in.....
                         </Button>
+                    ) : (
+                        <Button type="submit" className="w-full">
+                            Login
+                        </Button>
+                    )
+                    }
                     </CardFooter>
                 </form>
             </Card>
